@@ -4,26 +4,30 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLB 數據對決</title>
-    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
 </head>
 <body class="home-body">
     
-    <div class="overlay"></div> <div class="container">
+    <div class="overlay"></div> 
+    <div class="container">
         <h1>棒球(Select Your Team)</h1>
         <div class="team-selection">
             <a href="bluejays.html" class="team-card blue-jays">
-                <img src="bluejaysLogo.png" alt="Blue Jays Logo"> 
+                <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" alt="Blue Jays Logo"> 
                 <div class="card-overlay">
                     <h2>Blue Jays</h2>
                 </div>
             </a>
 
             <a href="dodgers.html" class="team-card dodgers">
-                <img src="dodgersLogo.png" alt="Dodgers Logo">
+                <img src="{{ url_for('static', filename='dodgersLogo.png') }}" alt="Dodgers Logo">
                 <div class="card-overlay">
                     <h2>Dodgers</h2>
                 </div>
             </a>
+        </div>
+        <div style="margin-bottom: 30px; margin-top: 40px;">
+            <a href="matchup.html" class="vs-btn">進入 VS 對決模式</a>
         </div>
     </div>
 

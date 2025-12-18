@@ -1,0 +1,251 @@
+* { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
+
+/* --- 首頁 --- */
+.home-body {
+    /* 假設 homepage.png 就在 static 資料夾內，與 style.css 同層 */
+    background-image: url('homepage.png'); 
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    position: relative;
+}
+
+/* 黑色遮罩 */
+.overlay {
+    position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+    background: rgba(0, 0, 0, 0.5); z-index: 1;
+}
+
+.container {
+    position: relative; z-index: 2; text-align: center; width: 80%;
+}
+
+.container h1 { color: white; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;}
+
+.team-selection {
+    display: flex;
+    justify-content: space-around;
+    gap: 20px;
+}
+
+/* 球隊按鈕卡片 */
+.team-card {
+    position: relative;
+    width: 300px;
+    height: 400px;
+    border-radius: 20px;
+    overflow: hidden;
+    text-decoration: none;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+    transition: transform 0.3s, box-shadow 0.3s;
+    border: 3px solid rgba(255,255,255,0.2);
+}
+
+.team-card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.5s;
+}
+
+/* --- 文字疊加層 --- */
+.card-overlay {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
+    z-index: 1;
+}
+
+.card-overlay h2 {
+    color: white;
+    font-size: 28px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+    margin: 0;
+}
+
+/* --- 滑鼠互動特效 --- */
+.team-card:hover {
+    transform: translateY(-10px);
+    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
+    border-color: #fff;
+}
+
+.team-card:hover img {
+    transform: scale(1.1);
+}
+
+.blue-jays:hover { border-color: #134A8E; }
+.dodgers:hover { border-color: #005A9C; }
+
+/* --- 球隊頁面 --- */
+.team-body {
+    background-size: cover;
+    background-position: center;
+    height: 100vh;
+    width: 100vw;
+}
+
+/* 注意：這裡假設 bj_bg.jpg 在 static/images/ 資料夾內 */
+.bluejays-bg { background-image: url('images/bj_bg.jpg'); }
+
+/* 佈局容器 */
+.layout-container {
+    display: flex;
+    height: 100vh;
+    width: 100%;
+    backdrop-filter: blur(5px);
+    background-color: rgba(0,0,0,0.3);
+}
+
+/* 左側導覽列 */
+.side-nav {
+    width: 250px;
+    background: rgba(255, 255, 255, 0.85);
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+}
+
+.back-btn { text-decoration: none; color: #333; font-weight: bold; margin-bottom: 10px; display: block;}
+
+.dropdown-group h3 {
+    margin-bottom: 10px;
+    color: #134A8E;
+    border-bottom: 2px solid #134A8E;
+    padding-bottom: 5px;
+}
+
+.dropdown-group ul { list-style: none; }
+
+.dropdown-group li {
+    padding: 10px;
+    cursor: pointer;
+    transition: background 0.2s;
+    border-radius: 5px;
+}
+
+.dropdown-group li:hover { background: #ddd; }
+
+/* 右側卡片區域 */
+.card-section {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 40px;
+}
+
+.player-card-container {
+    position: relative;
+    width: 400px;
+    height: 600px;
+    background: white;
+    border-radius: 20px;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    overflow: hidden;
+}
+
+.card-scroll-wrapper {
+    height: 100%;
+    overflow-y: scroll;
+    scroll-snap-type: y mandatory;
+    scrollbar-width: none;
+}
+.card-scroll-wrapper::-webkit-scrollbar { display: none; }
+
+.card-slide {
+    height: 100%;
+    scroll-snap-align: start;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 30px;
+    text-align: center;
+}
+
+.slide-content img {
+    width: 200px; height: 200px; object-fit: cover; border-radius: 50%;
+    border: 5px solid #134A8E; margin-bottom: 20px;
+}
+.slide-content h2 { margin-bottom: 10px; color: #333; }
+.slide-content p { color: #666; }
+
+.stats-content {
+    background: #f4f4f4;
+    width: 100%; height: 80%;
+    border-radius: 15px;
+    padding: 20px;
+    display: flex; flex-direction: column; justify-content: center;
+}
+.stat-box {
+    font-size: 24px; margin: 20px 0;
+    color: #134A8E; font-weight: bold;
+}
+
+.pagination-dots {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    z-index: 10;
+}
+
+.dot {
+    width: 10px; height: 10px;
+    background: rgba(0,0,0,0.2);
+    border-radius: 50%;
+    transition: all 0.3s;
+}
+
+.dot.active {
+    background: #134A8E;
+    height: 25px;
+}
+
+@media screen and (max-width: 768px) {
+    .team-selection {
+        flex-direction: column;
+        align-items: center;
+        gap: 30px;
+    }
+    .team-card {
+        width: 80%;
+        height: 250px;
+    }
+    .container h1 {
+        font-size: 24px;
+    }
+}
+
+/* 對決按鈕 */
+.vs-btn {
+    display: inline-block;
+    padding: 15px 40px;
+    background-color: #d32f2f;
+    color: white;
+    text-decoration: none;
+    font-size: 20px;
+    font-weight: bold;
+    border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+    transition: transform 0.2s, background 0.2s;
+}
+
+.vs-btn:hover {
+    background-color: #b71c1c;
+    transform: scale(1.05);
+}

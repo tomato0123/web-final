@@ -3,35 +3,40 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Blue Jays Roster</title>
-    <link rel="stylesheet" href="style.css">
-    </head>
-<body class="team-body bluejays-bg">
-
+    <title>Dodgers Roster</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body class="team-body dodgers-bg"> 
     <div class="layout-container">
         <nav class="side-nav">
-            <a href="index.html" class="back-btn">← Back</a>
+            <a href="{{ url_for('home') }}" class="back-btn">← Back</a>
             
             <div class="dropdown-group">
                 <h3>Coaches (C)</h3>
-                 <ul>
-                    <li onclick="updateCard('John Schneider', 'coach_john.jpg', 'Manager', 'N/A')">John Schneider</li>
-                    <li onclick="updateCard('Don Mattingly', 'coach_don.jpg', 'Bench Coach', 'N/A')">Don Mattingly</li>
+                <ul>
+                    <li onclick="updateCard('John Schneider', '', 'Manager', 'N/A')">John Schneider</li>
                 </ul>
             </div>
 
             <div class="dropdown-group">
                 <h3>Hitters (H)</h3>
                 <ul>
-                    <li onclick="updateCard('Vladimir Guerrero Jr.', 'vlad.jpg', '1B', '.264')">Vladimir Guerrero Jr.</li>
-                    <li onclick="updateCard('Bo Bichette', 'bo.jpg', 'SS', '.306')">Bo Bichette</li>
-                </ul>
+                    {% for p in hitters %}
+                    <li onclick="updateCard('{{ p.name }}', '{{ p.img }}', '{{ p.position }}', '{{ p.stat }}')">
+                        {{ p.name }}
+                    </li>
+                    {% endfor %}
+                    </ul>
             </div>
 
             <div class="dropdown-group">
                 <h3>Pitchers (P)</h3>
                 <ul>
-                    <li onclick="updateCard('Kevin Gausman', 'gausman.jpg', 'SP', '3.16 ERA')">Kevin Gausman</li>
+                    {% for p in pitchers %}
+                    <li onclick="updateCard('{{ p.name }}', '{{ p.img }}', '{{ p.position }}', '{{ p.stat }}')">
+                        {{ p.name }}
+                    </li>
+                    {% endfor %}
                 </ul>
             </div>
         </nav>
@@ -43,7 +48,7 @@
                     
                     <section class="card-slide slide-1">
                         <div class="slide-content">
-                           <img src="images/default_player.png" id="p-image" alt="Player">
+                           <img src="{{ url_for('static', filename='images/default_player.png') }}" id="p-image" alt="Player">
                            <h2 id="p-name">Select a Player</h2>
                            <p id="p-position">Position: --</p>
                         </div>
@@ -60,17 +65,17 @@
                         </div>
                     </section>
 
-                     </div>
+                </div>
 
                 <div class="pagination-dots">
                     <div class="dot active" data-slide="0"></div>
                     <div class="dot" data-slide="1"></div>
-                    </div>
+                </div>
 
             </div>
         </main>
     </div>
 
-    <script src="script.js"></script>
+    <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
 </html>

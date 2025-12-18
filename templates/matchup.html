@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MLB Player Matchup</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <script src="https://d3js.org/d3.v7.min.js"></script>
+    <style>
+        .matchup-container { display: flex; height: 100vh; background: rgba(0,0,0,0.8); color: white; }
+        .roster-col { width: 20%; padding: 80px 20px 20px 20px; overflow-y: auto; background: rgba(255,255,255,0.1); position: relative;}
+        .arena-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; }
+        .draggable-player { background: #fff; color: #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; cursor: grab; display: flex; align-items: center; gap: 10px; }
+        .draggable-player img { width: 30px; height: 30px; border-radius: 50%; }
+        .drop-zone-container { display: flex; justify-content: space-around; width: 100%; margin-bottom: 30px; }
+        .drop-zone { width: 200px; height: 250px; border: 2px dashed #888; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.3s; }
+        .drop-zone.hovered { background: rgba(255,255,255,0.2); border-color: #fff; }
+        .back-home-btn {
+            position: absolute; /* 絕對定位：讓它浮在畫面上 */
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.1); /* 半透明背景 */
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            border-radius: 30px; /* 圓角膠囊狀 */
+            backdrop-filter: blur(5px); /* 背景模糊特效 (玻璃質感) */
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            z-index: 1000; /* 確保它永遠在最上層 */
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .back-home-btn:hover {
+            background-color: rgba(255, 255, 255, 0.3); /* 滑鼠移過去變亮 */
+            transform: translateX(-3px); /* 微微往左動一下，增加互動感 */
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+        #chart-area { width: 80%; height: 400px; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; }
+    </style>
+</head>
+<body>
+
+    <div class="matchup-container">
+        <a href="{{ url_for('home') }}" class="back-home-btn">← Home</a>
+        <div class="roster-col" id="roster-bluejays">
+            <h3 style="color: #134A8E;">Blue Jays</h3>
+        </div>
+
+        <div class="arena-col">
+            <h1>VS MATCHUP</h1>
+            <div class="drop-zone-container">
+                <div class="drop-zone" id="zone-1" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <p>Drag Player A Here</p>
+                </div>
+                <div style="font-size: 50px; align-self: center;">⚡</div>
+                <div class="drop-zone" id="zone-2" ondrop="drop(event)" ondragover="allowDrop(event)">
+                    <p>Drag Player B Here</p>
+                </div>
+            </div>
+
+            <div id="chart-area"></div>
+        </div>
+
+        <div class="roster-col" id="roster-dodgers">
+            <h3 style="color: #005A9C;">Dodgers</h3>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='matchup.js') }}"></script>
+</body>
+</html>
