@@ -102,38 +102,32 @@ function renderPlayerInZone(zoneElement, player) {
     zoneElement.style.border = "2px solid #fff";
 }
 
-// D3 圖表繪製 (保持不變)
-function drawComparisonChart(p1, p2) {
-    d3.select("#chart-area").selectAll("*").remove();
+// D3 圖表繪製
+function drawComparisonChart(p1, p2, targetId = "#chart-area") {
+    // 清空該區域舊圖表
+    d3.select(targetId).selectAll("*").remove();
 
-    // 判斷兩位選手類型 (只比較同類型的)
+    // 判斷比較類型
     const p1Type = p1.stats.type;
     const p2Type = p2.stats.type;
 
-    let metrics = [];
-    
     if (p1Type !== p2Type) {
-        // 類型不同 (如投手 VS 打者)，只顯示簡單文字
-        d3.select("#chart-area").html("<h2 style='color:white; text-align:center; padding-top:50px;'>請比較相同類型的選手 (投手 vs 投手 或 打者 vs 打者)</h2>");
+        d3.select(targetId).html("<h2 style='color:white; text-align:center;'>請比較相同類型的選手</h2>");
         return;
     }
 
+    let metrics = [];
     if (p1Type === 'hitter') {
-        metrics = ['AVG', 'OBP', 'SLG', 'OPS']; // 比較這四項
+        metrics = ['AVG', 'OBP', 'SLG', 'OPS'];
     } else if (p1Type === 'pitcher') {
-        metrics = ['ERA', 'WHIP', 'K9', 'BB9']; // 比較這四項
+        metrics = ['ERA', 'WHIP', 'K9', 'BB9'];
     }
 
-    // 準備數據 (注意：數據需要轉成浮點數才能畫圖)
-    // 我們需要從 stats 物件中取出對應數據
+    // 準備數據
     const chartData = metrics.map(metric => {
-        // 轉換 key 名稱 (例如 'AVG' -> 'avg', 'K9' -> 'k9')
-        const key = metric.toLowerCase(); 
-        
-        // 特殊處理：因為 API 回傳的 key 可能跟 metric 不完全一樣
+        const key = metric.toLowerCase();
         let val1 = 0, val2 = 0;
         
-        // 簡單映射邏輯
         if(key === 'k9') { val1 = parseFloat(p1.stats.k9); val2 = parseFloat(p2.stats.k9); }
         else if(key === 'bb9') { val1 = parseFloat(p1.stats.bb9); val2 = parseFloat(p2.stats.bb9); }
         else { val1 = parseFloat(p1.stats[key]); val2 = parseFloat(p2.stats[key]); }
@@ -145,11 +139,16 @@ function drawComparisonChart(p1, p2) {
         };
     });
 
-    const margin = {top: 20, right: 30, bottom: 40, left: 40};
-    const width = document.getElementById('chart-area').clientWidth - margin.left - margin.right;
-    const height = 360 - margin.top - margin.bottom;
+    // 取得容器的寬高 (這樣才能適應彈出視窗的大尺寸)
+    const containerEl = document.querySelector(targetId);
+    const containerWidth = containerEl.clientWidth;
+    const containerHeight = containerEl.clientHeight;
 
-    const svg = d3.select("#chart-area")
+    const margin = {top: 40, right: 30, bottom: 40, left: 50}; // 邊距稍微加大
+    const width = containerWidth - margin.left - margin.right;
+    const height = containerHeight - margin.top - margin.bottom;
+
+    const svg = d3.select(targetId)
         .append("svg")
         .attr("width", width + margin.left + margin.right)
         .attr("height", height + margin.top + margin.bottom)
@@ -171,10 +170,13 @@ function drawComparisonChart(p1, p2) {
         .domain([0, maxValue * 1.1])
         .rangeRound([height, 0]);
 
+    // ★ 修改 2: 更改配色為「紅 vs 藍」高對比色 ★
+    // 左邊選手(p1) = 藍色 (#134A8E), 右邊選手(p2) = 紅色 (#D32F2F)
     const z = d3.scaleOrdinal()
         .domain([p1.name, p2.name])
-        .range(["#134A8E", "#005A9C"]);
+        .range(["#134A8E", "#D32F2F"]); 
 
+    // 畫長條
     svg.append("g")
         .selectAll("g")
         .data(chartData)
@@ -189,23 +191,27 @@ function drawComparisonChart(p1, p2) {
         .attr("height", d => height - y(d.value))
         .attr("fill", d => z(d.key));
 
+    // 畫軸
     svg.append("g")
         .attr("class", "axis")
         .attr("transform", `translate(0,${height})`)
+        .style("font-size", "14px") // 字體加大
         .call(d3.axisBottom(x0));
 
     svg.append("g")
         .attr("class", "axis")
+        .style("font-size", "14px")
         .call(d3.axisLeft(y).ticks(null, "s"));
     
+    // 圖例 (Legend)
     const legend = svg.append("g")
         .attr("font-family", "sans-serif")
-        .attr("font-size", 10)
+        .attr("font-size", 14) // 圖例字體加大
         .attr("text-anchor", "end")
         .selectAll("g")
         .data([p1.name, p2.name].slice().reverse())
         .enter().append("g")
-        .attr("transform", (d, i) => `translate(0,${i * 20})`);
+        .attr("transform", (d, i) => `translate(0,${i * 25})`); // 間距加大
 
     legend.append("rect")
         .attr("x", width - 19)
@@ -219,4 +225,35 @@ function drawComparisonChart(p1, p2) {
         .attr("dy", "0.32em")
         .attr("fill", "white") 
         .text(d => d);
+}
+
+// ★ 新增：彈出視窗控制邏輯 ★
+
+// 1. 監聽小圖表的點擊事件
+document.getElementById('chart-area').addEventListener('click', function() {
+    // 只有當兩邊都選了人 (已產生圖表) 時才觸發
+    if (selectedPlayer1 && selectedPlayer2) {
+        openModal();
+    }
+});
+
+function openModal() {
+    const modal = document.getElementById("chart-modal");
+    modal.style.display = "flex"; // 顯示視窗
+    
+    // 在彈出視窗的大容器裡再畫一次圖
+    // 傳入 '#modal-chart-area' 讓它畫在彈出視窗裡
+    drawComparisonChart(selectedPlayer1, selectedPlayer2, "#modal-chart-area");
+}
+
+function closeModal() {
+    document.getElementById("chart-modal").style.display = "none";
+}
+
+// 點擊視窗外部也可以關閉
+window.onclick = function(event) {
+    const modal = document.getElementById("chart-modal");
+    if (event.target == modal) {
+        closeModal();
+    }
 }

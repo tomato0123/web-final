@@ -13,10 +13,13 @@ TEAMS = {
 # app.py
 
 def get_mlb_roster(team_id):
+    print(f"\n--- 開始抓取球隊 {team_id} 的 2025 賽季資料 ---") 
     url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster"
-    # 這裡請求 season (基本) 數據，包含打擊與投球
+    
+    # ★ 設定為 2025 (因為賽季已結束，數據應該都有了)
     params = {
-        "hydrations": "person(stats(type=season,season=2024,group=[hitting,pitching]))"
+        "hydrate": "person(stats(group=[hitting,pitching],type=season,season=2025))",
+        "season": 2025 
     }
     
     hitters = []
@@ -26,82 +29,93 @@ def get_mlb_roster(team_id):
         response = requests.get(url, params=params)
         data = response.json()
         
-        for player in data.get('roster', []):
+        roster_list = data.get('roster', [])
+        if not roster_list:
+            print(f"!!! 警告: 球隊 {team_id} 回傳的名單是空的 !!!")
+
+        for player in roster_list:
             person = player.get('person', {})
+            player_name = person.get('fullName', 'Unknown')
+            player_id = person.get('id')
+            
+            # --- 新人判斷邏輯 (2025版) ---
+            is_rookie = person.get('rookie', False)
+            
+            # 輔助判斷：如果是 2025 年才初登場，也視為新人
+            debut_date = person.get('mlbDebutDate', '')
+            if debut_date and debut_date.startswith('2025'):
+                is_rookie = True
+            
+            # 抓取守備位置
+            pos_data = player.get('position') or person.get('primaryPosition') or {}
+            pos_code = pos_data.get('code')
+            pos_abbr = pos_data.get('abbreviation')
+
+            # 提取數據 (統一抓 2025)
             stats_list = person.get('stats', [])
-            pos_abbr = person.get('primaryPosition', {}).get('abbreviation')
-            pos_code = person.get('primaryPosition', {}).get('code')
+            hitter_stat = {}
+            pitcher_stat = {}
             
-            # 判斷身分： '1' 是投手
-            is_pitcher = (pos_code == '1')
-            
-            # --- ★ 修正重點：尋找正確的數據群組 ★ ---
-            # 投手要找 'pitching'，打者要找 'hitting'
-            target_group = 'pitching' if is_pitcher else 'hitting'
-            target_stat = {}
+            for s in stats_list:
+                group = s.get('group', {}).get('displayName', '').lower()
+                splits = s.get('splits', [])
+                if splits:
+                    if group == 'hitting':
+                        hitter_stat = splits[0].get('stat', {})
+                    elif group == 'pitching':
+                        pitcher_stat = splits[0].get('stat', {})
 
-            # 遍歷所有數據，找到對應的那一組
-            for stat_group in stats_list:
-                group_name = stat_group.get('group', {}).get('displayName')
-                if group_name == target_group:
-                    splits = stat_group.get('splits', [])
-                    if splits:
-                        target_stat = splits[0].get('stat', {})
-                    break
-            # --- 修正結束 ---
+            # --- 分流判斷 ---
 
-            # 初始化數據結構 (給預設值，避免前端出現 undefined)
-            stats_data = {}
-            
-            if is_pitcher:
-                # --- 投手數據 (Pitcher) ---
-                stats_data = {
-                    'type': 'pitcher',
-                    # 第二頁: 基本
-                    'era': target_stat.get('era', '-.--'),
-                    'whip': target_stat.get('whip', '-.--'),
-                    'w_l': f"{target_stat.get('wins', 0)}-{target_stat.get('losses', 0)}",
-                    'sv': target_stat.get('saves', 0),
-                    'ip': target_stat.get('inningsPitched', '0.0'),
-                    'so_bb': target_stat.get('strikeoutWalkRatio', '-.--'),
-                    # 第三頁: 進階
-                    'k9': target_stat.get('strikeoutsPer9Inn', '-.--'),
-                    'bb9': target_stat.get('walksPer9Inn', '-.--'),
-                    'h9': target_stat.get('hitsPer9Inn', '-.--'),
-                    'hr9': target_stat.get('homeRunsPer9Inn', '-.--')
-                }
-            else:
-                # --- 打者數據 (Hitter) ---
-                stats_data = {
-                    'type': 'hitter',
-                    # 第二頁: 基本
-                    'avg': target_stat.get('avg', '.---'),
-                    'ab': target_stat.get('atBats', 0),
-                    'h': target_stat.get('hits', 0),
-                    'rbi': target_stat.get('rbi', 0),
-                    'r': target_stat.get('runs', 0),
-                    'bb': target_stat.get('baseOnBalls', 0),
-                    'so': target_stat.get('strikeOuts', 0),
-                    # 第三頁: 進階
-                    'obp': target_stat.get('onBasePercentage', '.---'),
-                    'slg': target_stat.get('sluggingPercentage', '.---'),
-                    'ops': target_stat.get('ops', '.---'),
-                    'babip': target_stat.get('babip', '.---'),
-                    'woba': 'N/A',  # API 無此數據
-                    'wrc_plus': 'N/A' # API 無此數據
-                }
+            # 1. 處理投手 (Pitchers)
+            # 條件：投手(1)、二刀流(Y)、TWP，或有 2025 投球數據
+            if pos_code == '1' or pos_code == 'Y' or pos_abbr == 'TWP' or pitcher_stat:
+                pitchers.append({
+                    'name': player_name,
+                    'position': pos_abbr,
+                    'is_rookie': is_rookie,
+                    'img': f"https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/{player_id}/headshot/67/current",
+                    'stats': {
+                        'type': 'pitcher',
+                        'era': pitcher_stat.get('era', '-.--'),
+                        'whip': pitcher_stat.get('whip', '-.--'),
+                        'w_l': f"{pitcher_stat.get('wins', 0)}-{pitcher_stat.get('losses', 0)}",
+                        'sv': pitcher_stat.get('saves', 0),
+                        'ip': pitcher_stat.get('inningsPitched', '0.0'),
+                        'so_bb': pitcher_stat.get('strikeoutWalkRatio', '-.--'),
+                        'k9': pitcher_stat.get('strikeoutsPer9Inn', '-.--'),
+                        'bb9': pitcher_stat.get('walksPer9Inn', '-.--'),
+                        'h9': pitcher_stat.get('hitsPer9Inn', '-.--'),
+                        'hr9': pitcher_stat.get('homeRunsPer9Inn', '-.--')
+                    }
+                })
 
-            player_data = {
-                'name': person.get('fullName'),
-                'position': pos_abbr,
-                'stats': stats_data,
-                'img': f"https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/{person.get('id')}/headshot/67/current"
-            }
-
-            if is_pitcher:
-                pitchers.append(player_data)
-            else:
-                hitters.append(player_data)
+            # 2. 處理打者 (Hitters)
+            # 條件：非純投手(1)，或者有 2025 打擊數據 (大谷翔平會進來這裡)
+            if pos_code != '1' or hitter_stat:
+                hitters.append({
+                    'name': player_name,
+                    'position': pos_abbr,
+                    'is_rookie': is_rookie,
+                    'img': f"https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/{player_id}/headshot/67/current",
+                    'stats': {
+                        'type': 'hitter',
+                        'avg': hitter_stat.get('avg', '.---'),
+                        'hr': hitter_stat.get('homeRuns', 0),
+                        'ab': hitter_stat.get('atBats', 0),
+                        'h': hitter_stat.get('hits', 0),
+                        'rbi': hitter_stat.get('rbi', 0),
+                        'r': hitter_stat.get('runs', 0),
+                        'bb': hitter_stat.get('baseOnBalls', 0),
+                        'so': hitter_stat.get('strikeOuts', 0),
+                        'obp': hitter_stat.get('obp', '.---'),
+                        'slg': hitter_stat.get('slg', '.---'),
+                        'ops': hitter_stat.get('ops', '.---'),
+                        'babip': hitter_stat.get('babip', '.---'),
+                    }
+                })
+        
+        print(f"--- 成功: {team_id} 抓到 {len(hitters)} 位打者, {len(pitchers)} 位投手 ---\n")
                 
     except Exception as e:
         print(f"Error fetching roster: {e}")

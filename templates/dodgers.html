@@ -53,8 +53,12 @@
                     <section class="card-slide slide-1">
                         <div class="slide-content">
                             <img src="{{ url_for('static', filename='images/default_player.png') }}" id="p-image" alt="Player">
+                            
                             <h2 id="p-name" style="margin-bottom: 5px;">Select a Player</h2>
-                            <p id="p-position" style="font-size: 1.5em; color: #134A8E; font-weight: bold; margin-top: 0;">--</p>
+                            
+                            <span id="rookie-badge" class="rookie-badge" style="display: none;">ROOKIE</span>
+
+                            <p id="p-position" style="font-size: 1.5em; color: #134A8E; font-weight: bold; margin-top: 10px;">--</p>
                         </div>
                     </section>
 
@@ -82,6 +86,39 @@
 
             </div>
         </main>
+    </div>
+
+    <div id="hitter-glossary-modal" class="glossary-modal">
+        <div class="glossary-content">
+            <span class="close-glossary" onclick="closeGlossary()">&times;</span>
+            <h3>Hitter Stats Glossary</h3>
+            <ul>
+                <li><strong>AVG (Batting Average):</strong> 打擊率。安打數除以打數。衡量擊球成功的頻率。</li>
+                <li><strong>HR (Home Runs):</strong> 全壘打數。</li>
+                <li><strong>RBI (Runs Batted In):</strong> 打點。藉由打擊讓跑者得分的數量。</li>
+                <li><strong>OBP (On-Base Percentage):</strong> 上壘率。包含安打、保送、觸身球的上壘頻率。</li>
+                <li><strong>SLG (Slugging Percentage):</strong> 長打率。衡量擊出安打的推進壘包能力。</li>
+                <li><strong>OPS (On-Base + Slugging):</strong> 整體攻擊指數。上壘率與長打率的總和，衡量整體破壞力。</li>
+                <li><strong>BABIP:</strong> 場內球打擊率。排除全壘打與三振後，打進場內的球形成安打的機率。</li>
+            </ul>
+        </div>
+    </div>
+
+    <div id="pitcher-glossary-modal" class="glossary-modal">
+        <div class="glossary-content">
+            <span class="close-glossary" onclick="closeGlossary()">&times;</span>
+            <h3>Pitcher Stats Glossary</h3>
+            <ul>
+                <li><strong>ERA (Earned Run Average):</strong> 防禦率/自責分率。平均每九局會丟失多少自責分 (越低越好)。</li>
+                <li><strong>WHIP (Walks + Hits per IP):</strong> 每局被上壘率。平均每局被擊出安打或保送的人數 (越低越好)。</li>
+                <li><strong>SV (Saves):</strong> 救援成功。在球隊領先差距不大時登板守住勝利。</li>
+                <li><strong>SO/BB (K/BB Ratio):</strong> 三振保送比。衡量控球與壓制力的指標 (越高越好)。</li>
+                <li><strong>K/9 (Strikeouts per 9 IP):</strong> 每九局三振數。衡量三振能力。</li>
+                <li><strong>BB/9 (Walks per 9 IP):</strong> 每九局保送數。衡量控球穩定度 (越低越好)。</li>
+                <li><strong>H/9 (Hits per 9 IP):</strong> 每九局被安打數。衡量壓制打者擊球的能力 (越低越好)。</li>
+                <li><strong>HR/9 (Home Runs per 9 IP):</strong> 每九局被全壘打數。衡量被擊出長打的頻率 (越低越好)。</li>
+            </ul>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='script.js') }}"></script>

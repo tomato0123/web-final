@@ -40,6 +40,57 @@
             box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
         }
         #chart-area { width: 80%; height: 400px; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; }
+        .modal {
+            display: none; /* 預設隱藏 */
+            position: fixed; 
+            z-index: 9999; /* 最上層 */
+            left: 0;
+            top: 0;
+            width: 100%; 
+            height: 100%; 
+            background-color: rgba(0,0,0,0.9); /* 深黑背景 */
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+
+        /* 彈出視窗的內容容器 */
+        .modal-content {
+            background-color: #222;
+            padding: 20px;
+            border-radius: 15px;
+            width: 90%;  /* 寬度佔螢幕 90% */
+            height: 80%; /* 高度佔螢幕 80% */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            border: 2px solid #444;
+        }
+
+        /* 關閉按鈕 */
+        .close-btn {
+            position: absolute;
+            top: 15px;
+            right: 25px;
+            color: #f1f1f1;
+            font-size: 40px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .close-btn:hover { color: #bbb; }
+
+        /* 讓原本的小圖表變成「可點擊」的樣子 */
+        #chart-area {
+            cursor: pointer; /* 滑鼠移過去變成手型 */
+            transition: transform 0.2s;
+            border: 1px solid rgba(255,255,255,0.1);
+        }
+        #chart-area:hover {
+            transform: scale(1.02); /* 微微放大提示可點擊 */
+            border-color: #fff;
+        }
     </style>
 </head>
 <body>
@@ -68,6 +119,12 @@
         <div class="roster-col" id="roster-dodgers">
             <h3 style="color: #005A9C;">Dodgers</h3>
         </div>
+    </div>
+
+    <div id="chart-modal" class="modal">
+        <span class="close-btn" onclick="closeModal()">&times;</span>
+        <div id="modal-chart-area" class="modal-content">
+            </div>
     </div>
 
     <script src="{{ url_for('static', filename='matchup.js') }}"></script>
