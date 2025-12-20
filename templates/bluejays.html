@@ -12,28 +12,32 @@
             <a href="{{ url_for('home') }}" class="back-btn">← Back</a>
             
             <div class="dropdown-group">
-                <h3>Coaches (C)</h3>
+                <h3>Coaches</h3>
                 <ul>
-                    <li onclick="updateCard('John Schneider', '', 'Manager', 'N/A')">John Schneider</li>
+                    {% for c in coaches %}
+                    <li class="roster-item" data-player='{{ c | tojson | safe }}'>
+                        {{ c.name }}
+                    </li>
+                    {% endfor %}
                 </ul>
             </div>
 
             <div class="dropdown-group">
-                <h3>Hitters (H)</h3>
+                <h3>Hitters</h3>
                 <ul>
                     {% for p in hitters %}
-                    <li onclick="updateCard('{{ p.name }}', '{{ p.img }}', '{{ p.position }}', '{{ p.stat }}')">
+                    <li class="roster-item" data-player='{{ p | tojson | safe }}'>
                         {{ p.name }}
                     </li>
                     {% endfor %}
-                    </ul>
+                </ul>
             </div>
 
             <div class="dropdown-group">
-                <h3>Pitchers (P)</h3>
+                <h3>Pitchers</h3>
                 <ul>
                     {% for p in pitchers %}
-                    <li onclick="updateCard('{{ p.name }}', '{{ p.img }}', '{{ p.position }}', '{{ p.stat }}')">
+                    <li class="roster-item" data-player='{{ p | tojson | safe }}'>
                         {{ p.name }}
                     </li>
                     {% endfor %}
@@ -43,34 +47,38 @@
 
         <main class="card-section">
             <div class="player-card-container">
-                
+    
                 <div class="card-scroll-wrapper" id="cardScroller">
                     
                     <section class="card-slide slide-1">
                         <div class="slide-content">
-                           <img src="{{ url_for('static', filename='images/default_player.png') }}" id="p-image" alt="Player">
-                           <h2 id="p-name">Select a Player</h2>
-                           <p id="p-position">Position: --</p>
+                            <img src="{{ url_for('static', filename='images/default_player.png') }}" id="p-image" alt="Player">
+                            <h2 id="p-name" style="margin-bottom: 5px;">Select a Player</h2>
+                            <p id="p-position" style="font-size: 1.5em; color: #134A8E; font-weight: bold; margin-top: 0;">--</p>
                         </div>
                     </section>
 
                     <section class="card-slide slide-2">
-                         <div class="slide-content stats-content">
-                            <h3>Season Stats</h3>
-                            <div class="stat-box">
-                                <span class="stat-label">Key Stat:</span>
-                                <span class="stat-value" id="p-stat">--</span>
-                            </div>
-                            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. </p>
+                        <div class="slide-content stats-content">
+                            <h3 style="border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">Basic Stats</h3>
+                            <div id="stats-basic" style="width: 100%; text-align: left;"></div>
                         </div>
                     </section>
 
-                     </div>
+                    <section class="card-slide slide-3">
+                        <div class="slide-content stats-content">
+                        <h3 style="border-bottom: 2px solid #ccc; padding-bottom: 10px; margin-bottom: 15px;">Advanced Stats</h3>
+                        <div id="stats-advanced" style="width: 100%; text-align: left;"></div>
+                    </div>
+                </section>
+
+                </div>
 
                 <div class="pagination-dots">
                     <div class="dot active" data-slide="0"></div>
                     <div class="dot" data-slide="1"></div>
-                    </div>
+                    <div class="dot" data-slide="2"></div>
+                </div>
 
             </div>
         </main>

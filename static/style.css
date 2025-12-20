@@ -249,3 +249,14 @@
     background-color: #b71c1c;
     transform: scale(1.05);
 }
+
+/*球隊介面投手,打者顯示*/
+.stat-row {
+    display: flex;
+    justify-content: space-between;
+    padding: 10px 0;
+    border-bottom: 1px solid #ddd;
+    font-size: 18px;
+    color: #333;
+}
+.stat-label { font-weight: bold; color: #134A8E; }

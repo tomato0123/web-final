@@ -106,18 +106,48 @@ function renderPlayerInZone(zoneElement, player) {
 function drawComparisonChart(p1, p2) {
     d3.select("#chart-area").selectAll("*").remove();
 
+    // 判斷兩位選手類型 (只比較同類型的)
+    const p1Type = p1.stats.type;
+    const p2Type = p2.stats.type;
+
+    let metrics = [];
+    
+    if (p1Type !== p2Type) {
+        // 類型不同 (如投手 VS 打者)，只顯示簡單文字
+        d3.select("#chart-area").html("<h2 style='color:white; text-align:center; padding-top:50px;'>請比較相同類型的選手 (投手 vs 投手 或 打者 vs 打者)</h2>");
+        return;
+    }
+
+    if (p1Type === 'hitter') {
+        metrics = ['AVG', 'OBP', 'SLG', 'OPS']; // 比較這四項
+    } else if (p1Type === 'pitcher') {
+        metrics = ['ERA', 'WHIP', 'K9', 'BB9']; // 比較這四項
+    }
+
+    // 準備數據 (注意：數據需要轉成浮點數才能畫圖)
+    // 我們需要從 stats 物件中取出對應數據
+    const chartData = metrics.map(metric => {
+        // 轉換 key 名稱 (例如 'AVG' -> 'avg', 'K9' -> 'k9')
+        const key = metric.toLowerCase(); 
+        
+        // 特殊處理：因為 API 回傳的 key 可能跟 metric 不完全一樣
+        let val1 = 0, val2 = 0;
+        
+        // 簡單映射邏輯
+        if(key === 'k9') { val1 = parseFloat(p1.stats.k9); val2 = parseFloat(p2.stats.k9); }
+        else if(key === 'bb9') { val1 = parseFloat(p1.stats.bb9); val2 = parseFloat(p2.stats.bb9); }
+        else { val1 = parseFloat(p1.stats[key]); val2 = parseFloat(p2.stats[key]); }
+
+        return {
+            metric: metric,
+            [p1.name]: val1 || 0,
+            [p2.name]: val2 || 0
+        };
+    });
+
     const margin = {top: 20, right: 30, bottom: 40, left: 40};
     const width = document.getElementById('chart-area').clientWidth - margin.left - margin.right;
     const height = 360 - margin.top - margin.bottom;
-
-    const metrics = ['HR', 'RBI']; 
-    const chartData = metrics.map(metric => {
-        return {
-            metric: metric,
-            [p1.name]: p1[metric.toLowerCase()],
-            [p2.name]: p2[metric.toLowerCase()]
-        };
-    });
 
     const svg = d3.select("#chart-area")
         .append("svg")
