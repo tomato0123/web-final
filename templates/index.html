@@ -10,24 +10,28 @@
     
     <div class="overlay"></div> 
     <div class="container">
-        <h1>棒球(Select Your Team)</h1>
+        <h1>棒球</h1>
         <div class="team-selection">
             <a href="bluejays.html" class="team-card blue-jays">
                 <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" alt="Blue Jays Logo"> 
                 <div class="card-overlay">
-                    <h2>Blue Jays</h2>
+                    <h2>Blue Jays<br>(球員資訊)</h2>
                 </div>
             </a>
 
             <a href="dodgers.html" class="team-card dodgers">
                 <img src="{{ url_for('static', filename='dodgersLogo.png') }}" alt="Dodgers Logo">
                 <div class="card-overlay">
-                    <h2>Dodgers</h2>
+                    <h2>Dodgers<br>(球員資訊)</h2>
                 </div>
             </a>
         </div>
         <div style="margin-bottom: 30px; margin-top: 40px;">
             <a href="matchup.html" class="vs-btn">進入 VS 對決模式</a>
+
+            <a href="sandbox.html" class="vs-btn" style="background-color: #2e7d32; box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);">
+                戰術沙盤模擬
+            </a>
         </div>
     </div>
 

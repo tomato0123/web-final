@@ -184,6 +184,87 @@ def dodgers_page():
 def matchup_page():
     return render_template('matchup.html')
 
+@app.route('/sandbox.html')
+def sandbox_page():
+    # 1. 獲取原始資料
+    bj_hitters, bj_pitchers = get_mlb_roster(TEAMS['bluejays'])
+    lad_hitters, lad_pitchers = get_mlb_roster(TEAMS['dodgers'])
+    
+    # 輔助函式：處理球員數據、計算身價、並去除重複 (Merge TWP)
+    def process_team_players(hitters, pitchers, team_name):
+        player_map = {} # 用 ID 當 Key 來去重
+
+        # 先處理打者
+        for p in hitters:
+            p_id = p['name'] # 暫時用名字當 ID (API如果有id更好，這裡用名字夠用)
+            
+            # 真實數據計算
+            stats = p['stats']
+            ops = float(stats.get('ops', 0) if stats.get('ops') != '.---' else 0)
+            
+            # 分數：OPS * 90 (例如 OPS 1.0 -> 90分)
+            score = ops * 95
+            # 薪資(模擬市場價)：底薪0.75M + (OPS平方 * 25)
+            # 例如 OPS 1.0 -> $25M, OPS 0.7 -> $12M
+            salary = 0.75 + (ops * ops * 25)
+
+            p['power_score'] = round(score, 1)
+            p['salary'] = round(salary, 1)
+            p['team'] = team_name
+            p['role_type'] = 'hitter'
+            p['desc'] = f"AVG: {stats.get('avg')} | HR: {stats.get('hr')} | OPS: {stats.get('ops')}"
+            
+            player_map[p_id] = p
+
+        # 再處理投手 (如果有重複，代表是二刀流 TWP)
+        for p in pitchers:
+            p_id = p['name']
+            stats = p['stats']
+            
+            era = float(stats.get('era', 99) if stats.get('era') != '-.--' else 99)
+            # 分數：防禦率越低越好。 (7 - ERA) * 20
+            # ERA 2.0 -> 100分, ERA 5.0 -> 40分
+            raw_score = max(0, (6.5 - era) * 20)
+            # 薪資：底薪0.75M + 表現加給
+            raw_salary = 0.75 + max(0, (5.5 - era) * 8)
+
+            score = round(raw_score, 1)
+            salary = round(raw_salary, 1)
+            desc = f"ERA: {stats.get('era')} | WHIP: {stats.get('whip')}"
+
+            if p_id in player_map:
+                # ★ 發現大谷！(已在打者名單中) -> 執行合併 ★
+                existing = player_map[p_id]
+                existing['position'] = 'TWP' # 強制標記為二刀流
+                
+                # 分數取兩者最高 (通常大谷打擊更好)
+                existing['power_score'] = max(existing['power_score'], score)
+                
+                # 薪資疊加 (投打雙份貢獻 = 超級高薪)
+                # 大谷真實薪資 70M，這裡模擬算法會接近 50-60M
+                existing['salary'] = round(existing['salary'] + salary, 1)
+                
+                # 描述合併
+                existing['desc'] = f"OPS: {existing['stats'].get('ops')} | ERA: {stats.get('era')}"
+                existing['role_type'] = 'twp'
+            else:
+                # 純投手
+                p['power_score'] = score
+                p['salary'] = salary
+                p['team'] = team_name
+                p['role_type'] = 'pitcher'
+                p['desc'] = desc
+                player_map[p_id] = p
+
+        # 轉回 List
+        return list(player_map.values())
+
+    # 執行處理
+    bj_players = process_team_players(bj_hitters, bj_pitchers, 'bluejays')
+    lad_players = process_team_players(lad_hitters, lad_pitchers, 'dodgers')
+
+    return render_template('sandbox.html', bluejays=bj_players, dodgers=lad_players)
+
 # API 給 matchup.js 用的
 @app.route('/api/players')
 def get_all_players():

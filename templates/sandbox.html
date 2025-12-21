@@ -1,0 +1,266 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tactical Sandbox</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* --- 沙盒專用樣式擴充 --- */
+        .sandbox-body { background-color: #222; height: 100vh; overflow: hidden; color: white; display: flex;}
+        
+        .back-home-btn-sandbox {
+            display: inline-flex; align-items: center; gap: 5px;
+            padding: 8px 15px; margin-bottom: 15px;
+            background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255,255,255,0.2);
+            color: white; text-decoration: none; border-radius: 20px; font-weight: bold;
+            transition: all 0.3s;
+        }
+        .back-home-btn-sandbox:hover { background: rgba(255,255,255,0.3); transform: translateX(-3px); }
+
+        /* 左側選人區 */
+        .roster-panel {
+            width: 320px; background: #1a1a1a; padding: 20px;
+            display: flex; flex-direction: column; border-right: 1px solid #444; z-index: 100;
+        }
+        .team-tabs { display: flex; margin-bottom: 10px; border-bottom: 2px solid #444; }
+        .tab-btn { flex: 1; padding: 10px; background: none; border: none; color: #888; cursor: pointer; font-weight: bold; font-size: 16px; }
+        .tab-btn.active { color: white; border-bottom: 3px solid #134A8E; }
+        
+        .filter-bar { display: flex; gap: 5px; margin-bottom: 10px; flex-wrap: wrap; }
+        .filter-btn { background: #333; border: 1px solid #555; color: #ccc; padding: 4px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
+        .filter-btn.active { background: #134A8E; color: white; border-color: #134A8E; }
+
+        .player-list-container { flex: 1; overflow-y: auto; padding-right: 5px; }
+
+        .player-token {
+            background: #2a2a2a; color: white; padding: 8px; margin-bottom: 8px;
+            border-radius: 8px; cursor: grab; display: flex; align-items: center; gap: 10px;
+            border-left: 4px solid transparent; transition: transform 0.2s, background 0.2s;
+        }
+        .player-token:hover { background: #333; transform: translateX(5px); }
+        .player-token[data-team="bluejays"] { border-left-color: #134A8E; }
+        .player-token[data-team="dodgers"] { border-left-color: #005A9C; }
+        .player-token img { width: 40px; height: 40px; border-radius: 50%; object-fit: cover; background: #000;}
+        
+        /* 薪資標籤 */
+        .salary-badge { font-size: 11px; color: #88ff88; margin-left: auto; display: block; text-align: right;}
+
+        /* --- 中央球場區 --- */
+        .field-area {
+            flex: 1; position: relative;
+            background: radial-gradient(circle, #4CAF50 50%, #2E7D32 90%);
+            display: flex; justify-content: center; align-items: center;
+        }
+
+        .infield-dirt {
+            position: absolute; width: 450px; height: 450px; background: #795548; 
+            transform: rotate(45deg); border-radius: 15px;
+            box-shadow: inset 0 0 40px rgba(0,0,0,0.6);
+            /* 預設邊框顏色 */
+            border: 5px solid transparent; 
+            transition: border-color 0.5s;
+        }
+        /* 隊伍默契特效：當內野都是同一隊時，邊框發光 */
+        .infield-dirt.chemistry-bonus { border-color: #FFD700; box-shadow: 0 0 30px #FFD700; }
+
+        .base { position: absolute; width: 25px; height: 25px; background: white; transform: rotate(45deg); pointer-events: none;}
+        .base-1b { top: 0; right: 0; margin: 10px; }
+        .base-2b { top: 0; left: 0; margin: 10px; }
+        .base-3b { bottom: 0; left: 0; margin: 10px; }
+        .base-home { position: absolute; bottom: 0; right: 0; margin: 10px; width: 25px; height: 25px; background: white; clip-path: polygon(50% 0%, 100% 50%, 100% 100%, 0% 100%, 0% 50%); transform: rotate(-135deg); }
+
+        .position-box {
+            position: absolute; width: 90px; height: 110px;
+            border: 2px dashed rgba(255,255,255,0.6); border-radius: 10px;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            background: rgba(0,0,0,0.2); transition: all 0.3s; z-index: 10;
+        }
+        /* 智慧亮起：合法位置變綠色 */
+        .position-box.highlight-valid { border-color: #00ff00; background: rgba(0, 255, 0, 0.2); transform: scale(1.05); }
+        .position-box.occupied { border: 2px solid white; background: rgba(255,255,255,0.95); color: black; }
+        .position-box.wrong-pos { animation: shake 0.5s; border-color: red; background: rgba(255,0,0,0.3); }
+
+        .occupied img { width: 50px; height: 50px; border-radius: 50%; margin-bottom: 5px; border: 2px solid #333;}
+        .occupied .p-name { font-size: 12px; font-weight: bold; width: 100%; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: center;}
+        
+        /* --- 右側戰術面板 (新功能) --- */
+        .tactics-panel {
+            width: 280px; background: #222; border-left: 1px solid #444;
+            padding: 20px; display: flex; flex-direction: column;
+        }
+        
+        /* 薪資上限條 */
+        .salary-container { margin-bottom: 20px; background: #333; padding: 15px; border-radius: 10px; }
+        .salary-label { font-size: 14px; color: #aaa; margin-bottom: 5px; display: flex; justify-content: space-between; }
+        .progress-bar-bg { width: 100%; height: 10px; background: #555; border-radius: 5px; overflow: hidden; }
+        .progress-bar-fill { height: 100%; background: #4CAF50; width: 0%; transition: width 0.5s; }
+        .progress-bar-fill.over-budget { background: #f44336; }
+
+        /* 打擊棒次 */
+        .lineup-container { flex: 1; background: #333; padding: 10px; border-radius: 10px; overflow-y: auto; }
+        .lineup-container h3 { margin-top: 0; color: #FFD700; border-bottom: 1px solid #555; padding-bottom: 5px; font-size: 16px; }
+        .lineup-item { 
+            display: flex; align-items: center; padding: 8px 0; border-bottom: 1px solid #444; font-size: 13px;
+        }
+        .lineup-num { width: 20px; color: #888; font-weight: bold; }
+        
+        /* 操作按鈕 */
+        .action-btn { 
+            width: 100%; padding: 10px; margin-top: 10px; border: none; border-radius: 5px; 
+            font-weight: bold; cursor: pointer; transition: 0.2s; 
+        }
+        .btn-clear { background: #d32f2f; color: white; }
+        .btn-clear:hover { background: #b71c1c; }
+
+        /* --- 懸浮 Hover Card --- */
+        .hover-card {
+            position: absolute; display: none;
+            background: rgba(0,0,0,0.9); border: 1px solid #FFD700; color: white;
+            padding: 10px; border-radius: 8px; z-index: 1000; pointer-events: none;
+            min-width: 150px; box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+        .hover-card strong { color: #FFD700; display: block; margin-bottom: 5px; border-bottom: 1px solid #555; }
+
+        .lineup-item { 
+            display: flex; align-items: center; padding: 5px 0; border-bottom: 1px solid #444; font-size: 13px; 
+        }
+        .order-btns {
+            display: flex; flex-direction: column; margin-right: 5px;
+        }
+        .order-btn {
+            background: none; border: none; color: #888; cursor: pointer; font-size: 10px; line-height: 10px; padding: 2px;
+        }
+        .order-btn:hover { color: white; }
+
+        /* --- Toast 通知 --- */
+        #toast {
+            visibility: hidden; min-width: 250px; margin-left: -125px;
+            background-color: #333; color: #fff; text-align: center; border-radius: 50px;
+            padding: 16px; position: fixed; z-index: 1001; left: 50%; bottom: 30px;
+            font-size: 17px; box-shadow: 0 5px 15px rgba(0,0,0,0.3); border: 1px solid #555;
+        }
+        #toast.show { visibility: visible; animation: fadein 0.5s, fadeout 0.5s 2.5s; }
+
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        @keyframes shake {
+            0% { transform: translate(1px, 1px); } 50% { transform: translate(-1px, 2px); } 100% { transform: translate(1px, -2px); }
+        }
+    </style>
+</head>
+<body class="sandbox-body">
+
+    <div class="roster-panel">
+        <a href="{{ url_for('home') }}" class="back-home-btn-sandbox">← Home</a>
+        <div class="team-tabs">
+            <button class="tab-btn active" onclick="switchTeam('bluejays')">Blue Jays</button>
+            <button class="tab-btn" onclick="switchTeam('dodgers')">Dodgers</button>
+        </div>
+        <div class="filter-bar">
+            <div class="filter-btn active" onclick="filterPos('ALL')">All</div>
+            <div class="filter-btn" onclick="filterPos('P')">P</div>
+            <div class="filter-btn" onclick="filterPos('C')">C</div>
+            <div class="filter-btn" onclick="filterPos('IF')">IF</div>
+            <div class="filter-btn" onclick="filterPos('OF')">OF</div>
+            <div class="filter-btn" onclick="filterPos('DH')">DH</div>
+        </div>
+
+        <input type="text" id="searchInput" placeholder="Search..." onkeyup="filterName()" 
+               style="width: 100%; padding: 8px; margin-bottom: 10px; background: #333; border: 1px solid #555; color: white; border-radius: 5px;">
+        
+        <div class="player-list-container" id="bench">
+            {% for p in bluejays %}
+            <div class="player-token team-bluejays" draggable="true" data-team="bluejays"
+                 data-name="{{ p.name }}" data-img="{{ p.img }}" data-score="{{ p.power_score }}" 
+                 data-salary="{{ p.salary }}" data-pos="{{ p.position }}" data-desc="{{ p.desc }}">
+                <img src="{{ p.img }}">
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:13px;">{{ p.name }}</div>
+                    <div style="font-size:11px; color:#aaa;">{{ p.position }}</div>
+                </div>
+                <div style="text-align:right;">
+                    <span style="display:block; font-weight:bold; color:#FFD700;">{{ p.power_score }}</span>
+                    <span class="salary-badge">${{ p.salary }}M</span>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% for p in dodgers %}
+            <div class="player-token team-dodgers" draggable="true" style="display: none;" data-team="dodgers"
+                 data-name="{{ p.name }}" data-img="{{ p.img }}" data-score="{{ p.power_score }}" 
+                 data-salary="{{ p.salary }}" data-pos="{{ p.position }}" data-desc="{{ p.desc }}">
+                <img src="{{ p.img }}">
+                <div style="flex:1;">
+                    <div style="font-weight:bold; font-size:13px;">{{ p.name }}</div>
+                    <div style="font-size:11px; color:#aaa;">{{ p.position }}</div>
+                </div>
+                <div style="text-align:right;">
+                    <span style="display:block; font-weight:bold; color:#FFD700;">{{ p.power_score }}</span>
+                    <span class="salary-badge">${{ p.salary }}M</span>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <div class="field-area">
+        <div class="infield-dirt" id="infield">
+            <div class="base base-1b"></div>
+            <div class="base base-2b"></div>
+            <div class="base base-3b"></div>
+            <div class="base base-home"></div>
+        </div>
+
+        <div class="position-box" data-role="P" style="top: 50%; left: 50%; transform: translate(-50%, -50%);"><span class="pos-label">P</span></div>
+        <div class="position-box" data-role="C" style="top: 85%; left: 50%; transform: translate(-50%, -50%);"><span class="pos-label">C</span></div>
+        <div class="position-box" data-role="1B" style="top: 55%; left: 78%; transform: translate(-50%, -50%);"><span class="pos-label">1B</span></div>
+        <div class="position-box" data-role="2B" style="top: 35%; left: 62%; transform: translate(-50%, -50%);"><span class="pos-label">2B</span></div>
+        <div class="position-box" data-role="3B" style="top: 55%; left: 22%; transform: translate(-50%, -50%);"><span class="pos-label">3B</span></div>
+        <div class="position-box" data-role="SS" style="top: 35%; left: 38%; transform: translate(-50%, -50%);"><span class="pos-label">SS</span></div>
+        <div class="position-box" data-role="LF" style="top: 20%; left: 15%; transform: translate(-50%, -50%);"><span class="pos-label">LF</span></div>
+        <div class="position-box" data-role="CF" style="top: 10%; left: 50%; transform: translate(-50%, -50%);"><span class="pos-label">CF</span></div>
+        <div class="position-box" data-role="RF" style="top: 20%; left: 85%; transform: translate(-50%, -50%);"><span class="pos-label">RF</span></div>
+        
+        <div class="position-box" data-role="DH" style="top: 85%; left: 10%; transform: translate(-50%, -50%); border-color: #FFD700; border-style: solid;">
+            <span class="pos-label" style="color: #FFD700;">DH</span>
+        </div>
+    </div>
+
+    <div class="tactics-panel">
+        <div class="salary-container">
+            <div class="salary-label">
+                <span>Team Salary Cap</span>
+                <span id="salaryText">$0M / $150M</span>
+            </div>
+            <div class="progress-bar-bg">
+                <div class="progress-bar-fill" id="salaryBar"></div>
+            </div>
+            <div style="margin-top:10px; font-size:13px; color:#aaa;">
+                Team Rating: <span id="totalScore" style="color:#FFD700; font-weight:bold; font-size:16px;">0.0</span>
+            </div>
+            <div id="chemistryText" style="margin-top:5px; font-size:12px; color:#4CAF50; display:none;">
+                ★ Infield Chemistry Bonus Active!
+            </div>
+        </div>
+
+        <div class="lineup-container">
+            <h3>Batting Order (1-9)</h3>
+            <div id="lineupList">
+                <p style="color:#666; font-size:12px; padding:10px;">Drag fielders to the field to fill lineup.</p>
+            </div>
+        </div>
+
+        <button class="action-btn btn-clear" onclick="clearField()">Clear Field 🗑️</button>
+    </div>
+
+    <div id="toast">Default Toast Message</div>
+    <div id="hoverCard" class="hover-card">
+        <strong id="cardName">Name</strong>
+        <div id="cardStats" style="font-size:12px; line-height:1.4;">Stats...</div>
+        <div id="cardSalary" style="margin-top:5px; color:#88ff88;">$10M</div>
+    </div>
+
+    <script src="{{ url_for('static', filename='sandbox.js') }}"></script>
+</body>
+</html>
