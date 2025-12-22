@@ -5,35 +5,281 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MLB 數據對決</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+    <style>
+        /* 針對 Scroll Indicator 的微調樣式 */
+        .scroll-indicator {
+            position: absolute; 
+            bottom: 10px; 
+            left: 50%; 
+            transform: translateX(-50%);
+            color: rgba(255,255,255,0.7); 
+            animation: bounce 2s infinite;
+            z-index: 10;
+            pointer-events: none;
+        }
+        
+        /* 確保按鈕區與底部有足夠距離 */
+        .hero-buttons-container {
+            margin-bottom: 80px; 
+            margin-top: 40px; 
+            display: flex; 
+            flex-direction: column; 
+            gap: 15px; 
+            align-items: center;
+        }
+
+        /* 列表樣式優化 */
+        .apple-desc ul {
+            padding-left: 20px;
+            margin-top: 10px;
+            text-align: left;
+        }
+        .apple-desc li {
+            margin-bottom: 8px;
+            font-size: 0.9em;
+            color: #ccc;
+            line-height: 1.6;
+        }
+        .apple-desc strong {
+            color: #fff;
+        }
+    </style>
 </head>
 <body class="home-body">
     
     <div class="overlay"></div> 
-    <div class="container">
-        <h1>棒球</h1>
-        <div class="team-selection">
-            <a href="bluejays.html" class="team-card blue-jays">
-                <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" alt="Blue Jays Logo"> 
-                <div class="card-overlay">
-                    <h2>Blue Jays<br>(球員資訊)</h2>
-                </div>
-            </a>
+    
+    <section class="hero-section">
+        <div class="container">
+            <h1>棒球數據中心</h1>
+            
+            <div class="team-selection">
+                <a href="bluejays.html" class="team-card blue-jays">
+                    <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" alt="Blue Jays Logo"> 
+                    <div class="card-overlay">
+                        <h2>Blue Jays<br>(球員資訊)</h2>
+                    </div>
+                </a>
 
-            <a href="dodgers.html" class="team-card dodgers">
-                <img src="{{ url_for('static', filename='dodgersLogo.png') }}" alt="Dodgers Logo">
-                <div class="card-overlay">
-                    <h2>Dodgers<br>(球員資訊)</h2>
+                <a href="dodgers.html" class="team-card dodgers">
+                    <img src="{{ url_for('static', filename='dodgersLogo.png') }}" alt="Dodgers Logo">
+                    <div class="card-overlay">
+                        <h2>Dodgers<br>(球員資訊)</h2>
+                    </div>
+                </a>
+            </div>
+
+            <div class="hero-buttons-container">
+                <div style="display: flex; gap: 20px;">
+                    <a href="matchup.html" class="vs-btn">進入 VS 對決模式</a>
+                    <a href="sandbox.html" class="vs-btn" style="background-color: #2e7d32; box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);">
+                        戰術沙盤模擬
+                    </a>
                 </div>
-            </a>
+            </div>
+            
+            <div class="scroll-indicator">
+                <p style="margin:0; font-size:12px; letter-spacing:2px; text-transform:uppercase;">Scroll to learn baseball rules</p>
+                <span style="font-size:24px;">↓</span>
+            </div>
         </div>
-        <div style="margin-bottom: 30px; margin-top: 40px;">
-            <a href="matchup.html" class="vs-btn">進入 VS 對決模式</a>
+    </section>
 
-            <a href="sandbox.html" class="vs-btn" style="background-color: #2e7d32; box-shadow: 0 5px 15px rgba(46, 125, 50, 0.4);">
-                戰術沙盤模擬
-            </a>
+
+    <div class="scroll-showcase">
+        
+        <section class="apple-section">
+            <div class="content-box hidden-el left-in repeat-anim">
+                <h2 class="apple-title">棒球入門 <span class="gradient-text-green">場地與攻守配置</span></h2>
+                <div class="apple-desc">
+                    
+                    <h3 style="color:#4CAF50; margin:15px 0 5px 0; font-size:1.1em;">守備位置與代號 (Defensive Positions)</h3>
+                    <ul>
+                        <li><strong>1 (P) / 2 (C)：</strong> 投手 / 捕手</li>
+                        <li><strong>3-6 (內野)：</strong> 一壘手(1B)、二壘手(2B)、三壘手(3B)、游擊手(SS)</li>
+                        <li><strong>7-9 (外野)：</strong> 左外野(LF)、中外野(CF)、右外野(RF)</li>
+                    </ul>
+
+                    <h3 style="color:#4CAF50; margin:15px 0 5px 0; font-size:1.1em;">界內與界外 (Fair vs. Foul)</h3>
+                    <ul>
+                        <li><strong>界內球 (Fair)：</strong> 球落於邊線內或越過全壘打牆，打者可跑壘，防守方需盡快處理。</li>
+                        <li><strong>界外球 (Foul)：</strong> 球落於邊線外。未被接殺時計為一好球 (兩好球後除觸擊失敗外不計)。</li>
+                    </ul>
+
+                    <h3 style="color:#4CAF50; margin:15px 0 5px 0; font-size:1.1em;">好球帶定義 (The Strike Zone)</h3>
+                    <ul>
+                        <li><strong>空間：</strong> 本壘板寬度為準，高度約在打者膝蓋下緣至胸部/腋下之間。</li>
+                        <li><strong>判定：</strong> 球穿過此虛擬空間且打者未揮棒，即判為好球。</li>
+                    </ul>
+
+                     <h3 style="color:#4CAF50; margin:15px 0 5px 0; font-size:1.1em;">出局方式 (Making an Out)</h3>
+                    <ul>
+                        <li><strong>接殺 (Fly Out)：</strong> 球在落地前被防守員直接接住。</li>
+                        <li><strong>封殺 (Force Out)：</strong> 防守員持球比跑者先傳到必經壘包 (如擊出滾地球衝一壘)。</li>
+                        <li><strong>觸殺 (Tag Out)：</strong> 跑者離壘時，防守員持球觸碰其身體。</li>
+                    </ul>
+
+                    <h3 style="color:#4CAF50; margin:15px 0 5px 0; font-size:1.1em;">得分方式 (Scoring)</h3>
+                    <ul>
+                        <li><strong>安打 (Hit)：</strong> 球擊入界內且未出局，成功上壘。</li>
+                        <li><strong>全壘打 (Home Run)：</strong> 球直接飛越外野牆，所有跑者回本壘得分。</li>
+                        <li><strong>推進 (Advancement)：</strong> 靠隊友安打或保送，往下一個壘包前進。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-box hidden-el scale-up repeat-anim">
+                <img src="{{ url_for('static', filename='dodgersLogo.png') }}" alt="Field Diagram" style="object-fit: contain;">
+            </div>
+        </section>
+
+        <section class="apple-section reverse-layout">
+            <div class="content-box hidden-el right-in repeat-anim">
+                <h2 class="apple-title">棒球比賽流程 <span class="gradient-text-blue">與基礎規則</span></h2>
+                <div class="apple-desc">
+                    <p>了解一場棒球比賽是如何進行與結束的。</p>
+
+                    <h3 style="color:#4488ff; margin:15px 0 5px 0; font-size:1.1em;">比賽局數 (Innings)</h3>
+                    <ul>
+                        <li><strong>9 局制：</strong> 標準比賽共 9 局，沒有時間限制，直到分出勝負。若 9 局平手則進入延長賽。</li>
+                        <li><strong>上下半局：</strong> 每局分為「上半」(客隊進攻) 與「下半」(主隊進攻)。</li>
+                    </ul>
+
+                    <h3 style="color:#4488ff; margin:15px 0 5px 0; font-size:1.1em;">攻守交換 (Side Change)</h3>
+                    <ul>
+                        <li><strong>3 個出局數：</strong> 當防守方成功製造 3 個出局數 (Outs) 後，該半局結束，雙方交換攻守位置。</li>
+                    </ul>
+
+                    <h3 style="color:#4488ff; margin:15px 0 5px 0; font-size:1.1em;">投打對決基礎 (The Count)</h3>
+                    <ul>
+                        <li><strong>好球 (Strike)：</strong> 揮棒落空、界外球 (兩好球前)、或球進入好球帶未揮棒。集滿 3 好球即<strong>三振出局</strong>。</li>
+                        <li><strong>壞球 (Ball)：</strong> 球未進入好球帶且未揮棒。集滿 4 壞球即<strong>保送一壘</strong>。</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="image-box hidden-el scale-up repeat-anim">
+                <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" alt="Game Mechanics" style="object-fit: contain;">
+            </div>
+        </section>
+
+        <section class="apple-section center-layout">
+            <div class="content-box hidden-el bottom-in once-anim">
+                <h2 class="apple-title">Master the <span class="gradient-text-gold">Game</span></h2>
+                <p class="apple-desc">
+                    還看不懂電視轉播上的數據代號嗎？
+                    <br>我們的互動式轉播解碼器，帶你從入門到精通。
+                </p>
+                <br>
+                <button onclick="openGuide()" class="learn-more-btn" style="border-color:#FFD700; color:#FFD700; font-size: 20px; padding: 15px 40px;">
+                    Open Rookie Guide >
+                </button>
+            </div>
+        </section>
+
+    </div>
+
+
+    <div id="guideModal" class="guide-modal">
+        <div class="guide-content">
+            <span class="close-guide" onclick="closeGuide()">&times;</span>
+            <h2 style="color: #FFD700; margin-bottom: 20px; font-size: 36px;">📺 電視轉播畫面解密</h2>
+            <p style="color: #ccc; margin-bottom: 40px; font-size: 18px;">將滑鼠移到轉播條的各個部位，立即查看詳細解說！</p>
+            
+            <div class="tv-scoreboard big-scoreboard">
+                <div class="sb-team" data-tooltip="客隊 (Blue Jays) 目前得分 3 分">
+                    <img src="{{ url_for('static', filename='bluejaysLogo.png') }}" class="sb-logo">
+                    <span class="sb-name">TOR</span>
+                    <span class="sb-score">3</span>
+                </div>
+                <div class="sb-team" data-tooltip="主隊 (Dodgers) 目前得分 5 分">
+                    <img src="{{ url_for('static', filename='dodgersLogo.png') }}" class="sb-logo">
+                    <span class="sb-name">LAD</span>
+                    <span class="sb-score">5</span>
+                </div>
+                <div class="sb-inning" data-tooltip="第 7 局下半 (箭頭向下代表下半局)">
+                    <span class="inning-arrow">▼</span>
+                    <span class="inning-num">7</span>
+                </div>
+                <div class="sb-bases" data-tooltip="目前一、三壘有人">
+                    <div class="base-icon b2"></div>
+                    <div class="base-icon b1 active"></div>
+                    <div class="base-icon b3 active"></div>
+                </div>
+                <div class="sb-count" data-tooltip="2 好球 1 壞球 | 2 出局">
+                    <div class="count-balls"><span class="dot ball active"></span><span class="dot ball"></span><span class="dot ball"></span></div>
+                    <div class="count-strikes"><span class="dot strike active"></span><span class="dot strike active"></span></div>
+                    <div class="count-outs"><span class="dot out active"></span><span class="dot out active"></span></div>
+                    <div class="count-text">1-2  2OUT</div>
+                </div>
+                <div class="sb-pitcher" data-tooltip="投手：Yamamoto (今日已投 85 球)">
+                    <span class="p-name">P: Yamamoto</span>
+                    <span class="p-count">P: 85</span>
+                </div>
+            </div>
+
+            <div id="decoderText" class="decoder-info-box">請將滑鼠游標移動到上方轉播條的任一位置...</div>
+            <hr style="border-color: #444; margin: 40px 0;">
+            
+            <div class="rules-grid">
+                <div class="rule-card"><h3>🎯 好球帶</h3><p>是一個虛擬的立體空間。寬度為本壘板寬，高度約在打者膝蓋至胸部之間。球穿過此區且未揮棒即為好球。</p></div>
+                <div class="rule-card"><h3>⚔️ DH 指定打擊</h3><p>Designated Hitter。指專門負責打擊而不上場守備的球員，通常取代投手的打擊棒次。</p></div>
+                <div class="rule-card"><h3>📊 ERA & OPS</h3><p>ERA (防禦率) 越低越好；OPS (攻擊指數) 越高越好，代表打者的破壞力。</p></div>
+            </div>
         </div>
     </div>
+
+    <script>
+        // --- 1. Apple 風格滾動偵測 (Intersection Observer) ---
+        const observerOptions = {
+            threshold: 0.2 // 當元素出現 20% 時觸發
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    // 進場：播放動畫
+                    entry.target.classList.add('show');
+                    
+                    // ★ 邏輯判斷：如果是 'once-anim' (新手指南)，播完就停止觀察
+                    if (entry.target.classList.contains('once-anim')) {
+                        observer.unobserve(entry.target);
+                    }
+                } else {
+                    // ★ 邏輯判斷：如果是 'repeat-anim' (上方區塊)，離開時重置
+                    if (entry.target.classList.contains('repeat-anim')) {
+                        entry.target.classList.remove('show');
+                    }
+                }
+            });
+        }, observerOptions);
+
+        const hiddenElements = document.querySelectorAll('.hidden-el');
+        hiddenElements.forEach((el) => observer.observe(el));
+
+        // --- 2. 教學彈窗邏輯 ---
+        function openGuide() { document.getElementById('guideModal').style.display = 'flex'; }
+        function closeGuide() { document.getElementById('guideModal').style.display = 'none'; }
+        window.onclick = function(event) {
+            const modal = document.getElementById("guideModal");
+            if (event.target == modal) closeGuide();
+        }
+
+        // --- 3. 轉播條互動 ---
+        const decoderBox = document.getElementById('decoderText');
+        document.querySelectorAll('.tv-scoreboard > div').forEach(el => {
+            el.addEventListener('mouseenter', function() {
+                decoderBox.innerText = this.getAttribute('data-tooltip');
+                decoderBox.style.color = "#fff";
+                decoderBox.style.background = "rgba(19, 74, 142, 0.5)"; 
+                decoderBox.style.borderColor = "#4488ff";
+            });
+            el.addEventListener('mouseleave', function() {
+                decoderBox.innerText = "請將滑鼠游標移動到上方轉播條的任一位置...";
+                decoderBox.style.color = "#ffeb3b";
+                decoderBox.style.background = "rgba(255, 255, 255, 0.05)";
+                decoderBox.style.borderColor = "#555";
+            });
+        });
+    </script>
 
 </body>
 </html>

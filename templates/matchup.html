@@ -6,125 +6,123 @@
     <title>MLB Player Matchup</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <script src="https://d3js.org/d3.v7.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
     <style>
-        .matchup-container { display: flex; height: 100vh; background: rgba(0,0,0,0.8); color: white; }
-        .roster-col { width: 20%; padding: 80px 20px 20px 20px; overflow-y: auto; background: rgba(255,255,255,0.1); position: relative;}
-        .arena-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; }
-        .draggable-player { background: #fff; color: #333; padding: 10px; margin-bottom: 10px; border-radius: 5px; cursor: grab; display: flex; align-items: center; gap: 10px; }
-        .draggable-player img { width: 30px; height: 30px; border-radius: 50%; }
-        .drop-zone-container { display: flex; justify-content: space-around; width: 100%; margin-bottom: 30px; }
-        .drop-zone { width: 200px; height: 250px; border: 2px dashed #888; border-radius: 10px; display: flex; flex-direction: column; align-items: center; justify-content: center; transition: background 0.3s; }
-        .drop-zone.hovered { background: rgba(255,255,255,0.2); border-color: #fff; }
-        .back-home-btn {
-            position: absolute; /* 絕對定位：讓它浮在畫面上 */
-            top: 20px;
-            left: 20px;
-            padding: 10px 20px;
-            background-color: rgba(255, 255, 255, 0.1); /* 半透明背景 */
-            color: white;
-            text-decoration: none;
-            font-weight: bold;
-            border-radius: 30px; /* 圓角膠囊狀 */
-            backdrop-filter: blur(5px); /* 背景模糊特效 (玻璃質感) */
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            transition: all 0.3s ease;
-            z-index: 1000; /* 確保它永遠在最上層 */
-            display: flex;
-            align-items: center;
-            gap: 5px;
+        .matchup-container { display: flex; height: 100vh; background: #121212; color: white; overflow: hidden; position: relative;}
+        .roster-col { width: 22%; padding: 80px 10px 20px 10px; overflow-y: auto; background: rgba(255,255,255,0.05); border-right: 1px solid #333; border-left: 1px solid #333;}
+        .roster-section-title { font-size: 14px; color: #888; margin: 15px 0 5px 5px; text-transform: uppercase; letter-spacing: 1px; border-bottom: 1px solid #444; padding-bottom: 2px;}
+        .arena-col { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; padding: 20px; overflow-y: auto; position: relative;}
+        .draggable-player { background: #2c2c2c; color: #fff; padding: 8px; margin-bottom: 8px; border-radius: 6px; cursor: grab; display: flex; align-items: center; gap: 10px; border: 1px solid #444; transition: background 0.2s;}
+        .draggable-player:hover { background: #3e3e3e; border-color: #666; }
+        .draggable-player img { width: 36px; height: 36px; border-radius: 50%; background: black; object-fit: cover;}
+        .drop-zone-container { display: flex; justify-content: space-around; width: 100%; margin-bottom: 20px; }
+        .drop-zone { width: 180px; height: 220px; border: 2px dashed #666; border-radius: 15px; display: flex; flex-direction: column; align-items: center; justify-content: center; background: rgba(0,0,0,0.3); transition: all 0.3s;}
+        .drop-zone.hovered { border-color: #fff; background: rgba(255,255,255,0.1); }
+        .back-home-btn { position: absolute; top: 20px; left: 20px; padding: 10px 20px; background-color: rgba(255, 255, 255, 0.1); color: white; text-decoration: none; font-weight: bold; border-radius: 30px; border: 1px solid rgba(255, 255, 255, 0.2); z-index: 1000;}
+        #vs-3d-arena { width: 95%; height: 0px; background: #000; border-radius: 20px; border: 1px solid #333; position: relative; display: none; justify-content: center; overflow: hidden;}
+        #chart-area { width: 95%; min-height: 0px; display: none; background: rgba(255,255,255,0.02); border-radius: 20px; padding: 10px;}
+        
+        .matchup-tip-overlay { position: absolute; bottom: 60px; right: 20px; background: rgba(0, 0, 0, 0.85); padding: 10px 20px; border-radius: 20px; border: 1px solid #555; color: #ccc; font-size: 14px; pointer-events: none; z-index: 10; white-space: nowrap;}
+        
+        /* ★ 新增：切換按鈕樣式 */
+        .toggle-controls {
+            position: absolute; bottom: 15px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 15px; z-index: 20;
         }
+        .toggle-btn {
+            background: rgba(50, 50, 50, 0.8); border: 1px solid #666; color: #aaa;
+            padding: 8px 15px; border-radius: 20px; cursor: pointer; font-weight: bold;
+            transition: all 0.3s;
+        }
+        .toggle-btn.active-hitter { background: #d32f2f; color: white; border-color: #ff4444; box-shadow: 0 0 10px rgba(255, 68, 68, 0.5); }
+        .toggle-btn.active-pitcher { background: #134A8E; color: white; border-color: #4488ff; box-shadow: 0 0 10px rgba(68, 136, 255, 0.5); }
+        .toggle-btn:hover { transform: scale(1.05); }
 
-        .back-home-btn:hover {
-            background-color: rgba(255, 255, 255, 0.3); /* 滑鼠移過去變亮 */
-            transform: translateX(-3px); /* 微微往左動一下，增加互動感 */
-            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
-        }
-        #chart-area { width: 80%; height: 400px; background: rgba(255,255,255,0.05); border-radius: 15px; padding: 20px; }
-        .modal {
-            display: none; /* 預設隱藏 */
-            position: fixed; 
-            z-index: 9999; /* 最上層 */
-            left: 0;
-            top: 0;
-            width: 100%; 
-            height: 100%; 
-            background-color: rgba(0,0,0,0.9); /* 深黑背景 */
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-        }
+        #no-data-msg { display: none; width: 80%; padding: 30px; text-align: center; border: 2px solid #ff4444; background: rgba(255, 68, 68, 0.1); color: #ffaaaa; border-radius: 15px; margin-top: 50px;}
+        #no-data-msg h2 { margin-bottom: 10px; color: #ff4444; }
 
-        /* 彈出視窗的內容容器 */
-        .modal-content {
-            background-color: #222;
-            padding: 20px;
-            border-radius: 15px;
-            width: 90%;  /* 寬度佔螢幕 90% */
-            height: 80%; /* 高度佔螢幕 80% */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: relative;
-            border: 2px solid #444;
+        .help-btn { position: fixed; bottom: 30px; right: 30px; width: 50px; height: 50px; border-radius: 50%; background: #134A8E; color: white; font-size: 24px; font-weight: bold; display: flex; justify-content: center; align-items: center; cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); border: 2px solid rgba(255,255,255,0.2); z-index: 2000; transition: transform 0.3s;}
+        .help-btn:hover { transform: scale(1.1); background: #005A9C; }
+        .help-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 3000; justify-content: center; align-items: center;}
+        .help-content { background: #222; border: 1px solid #444; color: white; padding: 30px; border-radius: 15px; max-width: 500px; box-shadow: 0 10px 30px rgba(0,0,0,0.8);}
+        .help-content h2 { color: #FFD700; border-bottom: 1px solid #555; padding-bottom: 10px; margin-bottom: 15px; }
+        .help-content ul { padding-left: 20px; line-height: 1.8; }
+        .close-help { float: right; font-size: 24px; cursor: pointer; color: #888; }
+        .close-help:hover { color: white; }
+        
+        #loading-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.85); z-index: 9999;
+            display: none; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-size: 20px; letter-spacing: 2px; backdrop-filter: blur(5px);
         }
-
-        /* 關閉按鈕 */
-        .close-btn {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            color: #f1f1f1;
-            font-size: 40px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: 0.3s;
+        .spinner {
+            width: 60px; height: 60px;
+            border: 6px solid rgba(255, 255, 255, 0.2);
+            border-top: 6px solid #134A8E; border-right: 6px solid #D32F2F;
+            border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 20px;
         }
-        .close-btn:hover { color: #bbb; }
-
-        /* 讓原本的小圖表變成「可點擊」的樣子 */
-        #chart-area {
-            cursor: pointer; /* 滑鼠移過去變成手型 */
-            transition: transform 0.2s;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        #chart-area:hover {
-            transform: scale(1.02); /* 微微放大提示可點擊 */
-            border-color: #fff;
-        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
     </style>
 </head>
 <body>
-
     <div class="matchup-container">
         <a href="{{ url_for('home') }}" class="back-home-btn">← Home</a>
-        <div class="roster-col" id="roster-bluejays">
-            <h3 style="color: #134A8E;">Blue Jays</h3>
-        </div>
-
+        <div class="roster-col" id="roster-bluejays"></div>
         <div class="arena-col">
-            <h1>VS MATCHUP</h1>
+            <h1 style="margin-bottom: 20px; letter-spacing: 2px;">VS MATCHUP</h1>
             <div class="drop-zone-container">
-                <div class="drop-zone" id="zone-1" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <p>Drag Player A Here</p>
-                </div>
-                <div style="font-size: 50px; align-self: center;">⚡</div>
-                <div class="drop-zone" id="zone-2" ondrop="drop(event)" ondragover="allowDrop(event)">
-                    <p>Drag Player B Here</p>
-                </div>
+                <div class="drop-zone" id="zone-1" ondrop="drop(event)" ondragover="allowDrop(event)"><p style="color:#aaa;">Drag Player A</p></div>
+                <div style="font-size: 40px; align-self: center; color: #FFD700;">⚡</div>
+                <div class="drop-zone" id="zone-2" ondrop="drop(event)" ondragover="allowDrop(event)"><p style="color:#aaa;">Drag Player B</p></div>
+            </div>
+            
+            <div id="no-data-msg">
+                <h2>⚠️ 無法比對</h2>
+                <p>所選球員在 2024/2025 賽季無足夠九宮格數據。</p>
             </div>
 
+            <div id="vs-3d-arena">
+                <div id="3d-legend" class="matchup-tip-overlay"></div>
+                
+                <div class="toggle-controls" id="toggle-btns" style="display:none;">
+                    <button class="toggle-btn" id="btn-show-hitter" onclick="switch3DView('hitter')">顯示打者熱區</button>
+                    <button class="toggle-btn" id="btn-show-pitcher" onclick="switch3DView('pitcher')">顯示投手熱區</button>
+                </div>
+            </div>
             <div id="chart-area"></div>
         </div>
-
-        <div class="roster-col" id="roster-dodgers">
-            <h3 style="color: #005A9C;">Dodgers</h3>
-        </div>
+        <div class="roster-col" id="roster-dodgers"></div>
     </div>
 
-    <div id="chart-modal" class="modal">
-        <span class="close-btn" onclick="closeModal()">&times;</span>
-        <div id="modal-chart-area" class="modal-content">
-            </div>
+    <div id="loading-overlay">
+        <div class="spinner"></div>
+        <p>正在載入數據...</p>
+    </div>
+
+    <div class="help-btn" onclick="document.getElementById('helpModal').style.display='flex'">?</div>
+
+    <div id="helpModal" class="help-modal" onclick="if(event.target===this)this.style.display='none'">
+        <div class="help-content">
+            <span class="close-help" onclick="document.getElementById('helpModal').style.display='none'">&times;</span>
+            <h2>3D 熱區使用說明</h2>
+            <p style="color:#aaa; font-size:14px; margin-bottom:15px;">請使用下方按鈕切換觀看視角。</p>
+            <ul>
+                <li><strong><span style="color:#ff4444">■ 打者模式 (紅色)</span>：</strong><br>
+                    顯示該打者個人的<strong>打擊率 (AVG)</strong> 分佈。顏色越深紅，代表他越擅長打這個位置的球。
+                </li>
+                <br>
+                <li><strong><span style="color:#4488ff">■ 投手模式 (藍色)</span>：</strong><br>
+                    顯示該投手個人的<strong>被打擊率 (Opp AVG)</strong> 分佈。顏色越深藍，代表他投到這裡越容易被安打 (弱點)。
+                </li>
+                <br>
+                <li><strong>💡 註記：</strong><br>
+                    此為選手各自的生涯數據，並非兩者對決時的實際紀錄。
+                </li>
+            </ul>
+        </div>
     </div>
 
     <script src="{{ url_for('static', filename='matchup.js') }}"></script>

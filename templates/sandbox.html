@@ -261,6 +261,57 @@
         <div id="cardSalary" style="margin-top:5px; color:#88ff88;">$10M</div>
     </div>
 
+    <div class="help-btn" onclick="document.getElementById('sandboxHelpModal').style.display='flex'">?</div>
+
+    <div id="sandboxHelpModal" class="help-modal" onclick="if(event.target===this)this.style.display='none'">
+        <div class="help-content">
+            
+            <div class="zoom-controls">
+                <button class="zoom-btn" onclick="changeFontSize(2)" title="放大字體">A+</button>
+                <button class="zoom-btn" onclick="changeFontSize(-2)" title="縮小字體">A-</button>
+            </div>
+
+            <span class="close-help" onclick="document.getElementById('sandboxHelpModal').style.display='none'">&times;</span>
+            
+            <h2>戰術沙盤使用說明</h2>
+            
+            <div class="help-text-body" id="helpTextBody">
+                <h3 style="color:#4488ff; border-color:#4488ff;">1. 基本操作</h3>
+                <ul>
+                    <li><strong>拖放球員：</strong>從左側球員名單，按住滑鼠左鍵將球員拖曳至球場上的守備位置。</li>
+                    <li><strong>查看資訊：</strong>滑鼠游標停留在場上球員可查看詳細數據與薪資；<strong>雙擊球員</strong>可將其移回板凳。</li>
+                    <li><strong>一鍵清空：</strong>點擊右側面板下方的 <span style="color:#ff4444; border:1px solid #ff4444; padding:2px 5px; border-radius:4px;">Clear Field</span> 按鈕可清空場上所有球員。</li>
+                </ul>
+
+                <h3 style="color:#4CAF50; border-color:#4CAF50;">2. 規則限制</h3>
+                <ul>
+                    <li><strong>位置防呆：</strong>投手只能放 P，內外野手需符合守備位置邏輯 (DH 可放任何非投手)。</li>
+                    <li><strong>薪資上限：</strong>團隊總薪資不可超過 <strong style="color:#88ff88; font-size:1.2em;">$150M</strong>，否則系統會阻止您放入新球員。</li>
+                </ul>
+
+                <h3 style="color:#FFD700; border-color:#FFD700;">3. 特殊加成</h3>
+                <ul>
+                    <li><strong>內野默契 (Chemistry Bonus)：</strong>若內野四個位置 (1B, 2B, 3B, SS) 皆為<strong>同一隊球員</strong>，將觸發特效並獲得團隊分數加成！</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentFontSize = 18; // 預設字體大小
+
+        function changeFontSize(delta) {
+            const textBody = document.getElementById('helpTextBody');
+            currentFontSize += delta;
+            
+            // 限制最小和最大字體，避免壞掉
+            if (currentFontSize < 14) currentFontSize = 14;
+            if (currentFontSize > 32) currentFontSize = 32;
+
+            textBody.style.fontSize = currentFontSize + "px";
+        }
+    </script>
+
     <script src="{{ url_for('static', filename='sandbox.js') }}"></script>
 </body>
 </html>

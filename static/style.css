@@ -1,92 +1,156 @@
+/* static/style.css - 完整修正版 */
+
 * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Arial', sans-serif; }
 
-/* --- 首頁 --- */
+/* --- 1. 基礎設定 --- */
+html, body {
+    margin: 0;
+    padding: 0;
+    overflow-x: hidden;
+}
+
+/* --- 2. 顏色主題系統 (關鍵修正) --- */
+/* 預設 (藍鳥) - 或當 body 有 .bluejays-bg 時 */
+:root {
+    --theme-color: #134A8E;       /* 藍鳥深藍 */
+    --theme-hover: #0e3669;
+}
+
+/* 當 body 是道奇隊時，自動切換變數顏色 */
+.dodgers-bg {
+    --theme-color: #005A9C;       /* 道奇寶藍 */
+    --theme-hover: #003f6e;
+}
+
+/* --- 3. 首頁 (Home) 相關樣式 --- */
 .home-body {
-    /* 假設 homepage.png 就在 static 資料夾內，與 style.css 同層 */
-    background-image: url('homepage.png'); 
+    background-color: #000;
+    min-height: 100vh;
+}
+
+.hero-section {
+    position: relative;
+    height: 100vh;
+    width: 100%;
+    background-image: url('homepage.png'); /* 確保圖片在 static/ 下 */
     background-size: cover;
     background-position: center;
-    height: 100vh;
+    background-attachment: fixed;
     display: flex;
     justify-content: center;
     align-items: center;
-    position: relative;
 }
 
-/* 黑色遮罩 */
 .overlay {
     position: absolute; top: 0; left: 0; width: 100%; height: 100%;
     background: rgba(0, 0, 0, 0.5); z-index: 1;
 }
 
 .container {
-    position: relative; z-index: 2; text-align: center; width: 80%;
+    position: relative; z-index: 2; text-align: center; width: 90%; max-width: 1200px;
 }
 
-.container h1 { color: white; margin-bottom: 30px; text-transform: uppercase; letter-spacing: 2px;}
+.container h1 { 
+    color: white; margin-bottom: 30px; 
+    text-transform: uppercase; letter-spacing: 4px; font-size: 3rem; 
+    text-shadow: 0 0 20px rgba(0,0,0,0.8);
+}
 
+/* 首頁球隊選擇卡片 */
 .team-selection {
-    display: flex;
-    justify-content: space-around;
-    gap: 20px;
+    display: flex; justify-content: center; gap: 40px; flex-wrap: wrap;
 }
 
-/* 球隊按鈕卡片 */
 .team-card {
-    position: relative;
-    width: 300px;
-    height: 400px;
-    border-radius: 20px;
-    overflow: hidden;
-    text-decoration: none;
+    position: relative; width: 300px; height: 400px;
+    border-radius: 20px; overflow: hidden; text-decoration: none;
     box-shadow: 0 10px 20px rgba(0,0,0,0.5);
     transition: transform 0.3s, box-shadow 0.3s;
-    border: 3px solid rgba(255,255,255,0.2);
+    border: 3px solid rgba(255,255,255,0.2); background: #000;
 }
+.team-card img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s; opacity: 0.8; }
 
-.team-card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    transition: transform 0.5s;
-}
-
-/* --- 文字疊加層 --- */
 .card-overlay {
-    position: absolute;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    padding: 20px;
-    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-    z-index: 1;
+    position: absolute; bottom: 0; left: 0; width: 100%; padding: 20px;
+    background: linear-gradient(to top, rgba(0,0,0,0.9), transparent); z-index: 1;
 }
-
 .card-overlay h2 {
-    color: white;
-    font-size: 28px;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-    margin: 0;
+    color: white; font-size: 28px; font-weight: bold; text-transform: uppercase;
+    letter-spacing: 1px; text-shadow: 2px 2px 4px rgba(0,0,0,0.8); margin: 0;
 }
 
-/* --- 滑鼠互動特效 --- */
-.team-card:hover {
-    transform: translateY(-10px);
-    box-shadow: 0 15px 30px rgba(0,0,0,0.6);
-    border-color: #fff;
-}
+.team-card:hover { transform: translateY(-10px); box-shadow: 0 15px 30px rgba(0,0,0,0.6); border-color: #fff; }
+.team-card:hover img { transform: scale(1.1); opacity: 1; }
 
-.team-card:hover img {
-    transform: scale(1.1);
-}
-
+/* 首頁的 Hover 顏色保持獨立設定 */
 .blue-jays:hover { border-color: #134A8E; }
 .dodgers:hover { border-color: #005A9C; }
 
-/* --- 球隊頁面 --- */
+/* 按鈕區與箭頭 */
+.hero-buttons-container {
+    margin-bottom: 80px; margin-top: 40px; 
+    display: flex; flex-direction: column; gap: 15px; align-items: center;
+}
+.vs-btn {
+    display: inline-block; padding: 15px 40px;
+    background-color: #d32f2f; color: white; text-decoration: none;
+    font-size: 18px; font-weight: bold; border-radius: 50px;
+    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
+    transition: transform 0.2s, background 0.2s;
+    text-transform: uppercase; letter-spacing: 1px;
+}
+.vs-btn:hover { filter: brightness(1.2); transform: scale(1.05); }
+
+.scroll-indicator {
+    position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
+    color: rgba(255,255,255,0.7); animation: bounce 2s infinite;
+    z-index: 10; pointer-events: none;
+}
+@keyframes bounce {
+    0%, 20%, 50%, 80%, 100% {transform: translateX(-50%) translateY(0);}
+    40% {transform: translateX(-50%) translateY(-10px);}
+    60% {transform: translateX(-50%) translateY(-5px);}
+}
+
+
+/* --- 4. Apple 風格滾動區塊 --- */
+.scroll-showcase {
+    position: relative; z-index: 10;
+    background-color: #000; color: white;
+}
+.apple-section {
+    min-height: 80vh; 
+    display: flex; align-items: center; justify-content: center;
+    gap: 80px; padding: 100px 10%;
+    border-bottom: 1px solid #111;
+}
+.apple-section.reverse-layout { flex-direction: row-reverse; }
+.apple-section.center-layout { flex-direction: column; text-align: center; }
+
+.apple-title { font-size: 56px; font-weight: 800; margin-bottom: 20px; line-height: 1.1; letter-spacing: -1px; }
+.apple-desc { font-size: 24px; color: #86868b; font-weight: 500; max-width: 500px; line-height: 1.5; }
+
+.gradient-text-blue { background: linear-gradient(90deg, #00c6ff, #0072ff); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gradient-text-green { background: linear-gradient(90deg, #4CAF50, #8BC34A); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+.gradient-text-gold { background: linear-gradient(90deg, #FFD700, #FFA500); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+
+.image-box img { width: 100%; max-width: 600px; border-radius: 20px; box-shadow: 0 20px 50px rgba(0,0,0,0.5); border: 1px solid #333; }
+.learn-more-btn {
+    background: transparent; border: 2px solid #2997ff; color: #2997ff;
+    padding: 10px 30px; border-radius: 30px; font-size: 18px; cursor: pointer; transition: all 0.3s;
+}
+.learn-more-btn:hover { background: #2997ff; color: white; }
+
+/* 動畫類別 */
+.hidden-el { opacity: 0; transition: all 1.2s cubic-bezier(0.16, 1, 0.3, 1); }
+.left-in { transform: translateX(-50px); }
+.right-in { transform: translateX(50px); }
+.bottom-in { transform: translateY(50px); }
+.scale-up { transform: scale(0.9); }
+.show { opacity: 1; transform: translate(0) scale(1); }
+
+
+/* --- 5. 球隊頁面 (Team Page) 樣式 --- */
 .team-body {
     background-size: cover;
     background-position: center;
@@ -94,268 +158,315 @@
     width: 100vw;
 }
 
-/* 注意：這裡假設 bj_bg.jpg 在 static/images/ 資料夾內 */
-.bluejays-bg { background-image: url('images/bj_bg.jpg'); }
+.bluejays-bg { background-image: url('bjPage_bg.jpg'); } 
+.dodgers-bg { background-image: url('doPage_bg.jpg'); }
 
-/* 佈局容器 */
 .layout-container {
-    display: flex;
-    height: 100vh;
-    width: 100%;
-    backdrop-filter: blur(5px);
+    display: flex; height: 100vh; width: 100%;
+    /*backdrop-filter: blur(1px);*/ 
     background-color: rgba(0,0,0,0.3);
 }
 
-/* 左側導覽列 */
+/* 左側導覽 */
 .side-nav {
-    width: 250px;
-    background: rgba(255, 255, 255, 0.85);
-    padding: 20px;
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    overflow-y: auto;
+    width: 250px; background: rgba(255, 255, 255, 0.9);
+    padding: 20px; display: flex; flex-direction: column; gap: 20px; overflow-y: auto;
 }
-
 .back-btn { text-decoration: none; color: #333; font-weight: bold; margin-bottom: 10px; display: block;}
 
 .dropdown-group h3 {
     margin-bottom: 10px;
-    color: #134A8E;
-    border-bottom: 2px solid #134A8E;
+    color: var(--theme-color);             /* 使用變數 */
+    border-bottom: 2px solid var(--theme-color); /* 使用變數 */
     padding-bottom: 5px;
 }
-
 .dropdown-group ul { list-style: none; }
-
-.dropdown-group li {
-    padding: 10px;
-    cursor: pointer;
-    transition: background 0.2s;
-    border-radius: 5px;
-}
-
+.dropdown-group li { padding: 10px; cursor: pointer; transition: background 0.2s; border-radius: 5px; }
 .dropdown-group li:hover { background: #ddd; }
 
-/* 右側卡片區域 */
-.card-section {
-    flex: 1;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 40px;
-}
-
+/* 右側卡片 */
+.card-section { flex: 1; display: flex; justify-content: center; align-items: center; padding: 40px; }
 .player-card-container {
-    position: relative;
-    width: 400px;
-    height: 600px;
-    background: white;
-    border-radius: 20px;
-    box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-    overflow: hidden;
+    position: relative; width: 400px; height: 600px;
+    background: white; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
 }
 
-.card-scroll-wrapper {
-    height: 100%;
-    overflow-y: scroll;
-    scroll-snap-type: y mandatory;
-    scrollbar-width: none;
-}
+.card-scroll-wrapper { height: 100%; overflow-y: scroll; scroll-snap-type: y mandatory; scrollbar-width: none; }
 .card-scroll-wrapper::-webkit-scrollbar { display: none; }
-
-.card-slide {
-    height: 100%;
-    scroll-snap-align: start;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 30px;
-    text-align: center;
-}
+.card-slide { height: 100%; scroll-snap-align: start; display: flex; justify-content: center; align-items: center; padding: 30px; text-align: center; }
 
 .slide-content img {
     width: 200px; height: 200px; object-fit: cover; border-radius: 50%;
-    border: 5px solid #134A8E; margin-bottom: 20px;
+    border: 5px solid var(--theme-color);  /* 使用變數 */
+    margin-bottom: 20px;
 }
 .slide-content h2 { margin-bottom: 10px; color: #333; }
-.slide-content p { color: #666; }
 
-.stats-content {
-    background: #f4f4f4;
-    width: 100%; height: 80%;
-    border-radius: 15px;
-    padding: 20px;
-    display: flex; flex-direction: column; justify-content: center;
-}
+.stats-content { background: #f4f4f4; width: 100%; height: 80%; border-radius: 15px; padding: 20px; display: flex; flex-direction: column; justify-content: center; }
 .stat-box {
     font-size: 24px; margin: 20px 0;
-    color: #134A8E; font-weight: bold;
+    color: var(--theme-color);             /* 使用變數 */
+    font-weight: bold;
+}
+.stat-row { display: flex; justify-content: space-between; padding: 10px 0; border-bottom: 1px solid #ddd; font-size: 18px; color: #333; }
+.stat-label { 
+    font-weight: bold; 
+    color: var(--theme-color);             /* 使用變數 */
 }
 
-.pagination-dots {
-    position: absolute;
-    right: 15px;
-    top: 50%;
-    transform: translateY(-50%);
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    z-index: 10;
-}
-
-.dot {
-    width: 10px; height: 10px;
-    background: rgba(0,0,0,0.2);
-    border-radius: 50%;
-    transition: all 0.3s;
-}
-
+/* 分頁點 */
+.pagination-dots { position: absolute; right: 15px; top: 50%; transform: translateY(-50%); display: flex; flex-direction: column; gap: 10px; z-index: 10; }
+.dot { width: 10px; height: 10px; background: rgba(0,0,0,0.2); border-radius: 50%; transition: all 0.3s; }
 .dot.active {
-    background: #134A8E;
+    background: var(--theme-color);        /* 使用變數 */
     height: 25px;
 }
 
-@media screen and (max-width: 768px) {
-    .team-selection {
-        flex-direction: column;
-        align-items: center;
-        gap: 30px;
-    }
-    .team-card {
-        width: 80%;
-        height: 250px;
-    }
-    .container h1 {
-        font-size: 24px;
-    }
-}
-
-/* 對決按鈕 */
-.vs-btn {
-    display: inline-block;
-    padding: 15px 40px;
-    background-color: #d32f2f;
-    color: white;
-    text-decoration: none;
-    font-size: 20px;
-    font-weight: bold;
-    border-radius: 50px;
-    box-shadow: 0 5px 15px rgba(211, 47, 47, 0.4);
-    transition: transform 0.2s, background 0.2s;
-}
-
-.vs-btn:hover {
-    background-color: #b71c1c;
-    transform: scale(1.05);
-}
-
-/*球隊介面投手,打者顯示*/
-.stat-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 10px 0;
-    border-bottom: 1px solid #ddd;
-    font-size: 18px;
-    color: #333;
-}
-.stat-label { font-weight: bold; color: #134A8E; }
-
-/* Rookie 標籤樣式 */
+/* Rookie 標籤 */
 .rookie-badge {
-    background-color: #FFD700; /* 金色 */
-    color: #000;
-    font-size: 12px;
-    font-weight: bold;
-    padding: 3px 8px;
-    border-radius: 12px;
-    vertical-align: middle;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    margin-bottom: 5px; /* 與下方文字的間距 */
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    border: 1px solid #DAA520;
+    background-color: #FFD700; color: #000; font-size: 12px; font-weight: bold;
+    padding: 3px 8px; border-radius: 12px; vertical-align: middle;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); margin-bottom: 5px;
+    text-transform: uppercase; letter-spacing: 1px; border: 1px solid #DAA520;
 }
 
-/* --- 名詞解釋按鈕樣式 --- */
-.stat-info-btn-container {
-    text-align: right; /* 讓按鈕靠右對齊 */
-    margin-bottom: 10px;
-    margin-top: -10px; /* 稍微往上拉一點 */
-}
-
+/* 名詞解釋按鈕 */
+.stat-info-btn-container { text-align: right; margin-bottom: 10px; margin-top: -10px; }
 .stat-info-btn {
-    background-color: #134A8E; /* 藍色背景 */
-    color: white;
-    border: none;
-    border-radius: 50%; /* 圓形 */
-    width: 24px;
-    height: 24px;
-    font-size: 14px;
-    font-weight: bold;
-    cursor: pointer;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-    transition: background-color 0.3s;
+    background-color: var(--theme-color);  /* 使用變數 */
+    color: white; border: none; border-radius: 50%; width: 24px; height: 24px;
+    font-size: 14px; font-weight: bold; cursor: pointer;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2); transition: background-color 0.3s;
 }
-
 .stat-info-btn:hover {
-    background-color: #0e3669; /* 滑鼠移過去變深藍 */
+    background-color: var(--theme-hover);  /* 使用變數 */
 }
 
 
-/* --- 彈出視窗樣式 (Modal) --- */
-.glossary-modal {
-    display: none; /* 預設隱藏 */
-    position: fixed; 
-    z-index: 1000; /* 最上層 */
-    left: 0;
-    top: 0;
-    width: 100%; 
-    height: 100%; 
-    background-color: rgba(0,0,0,0.7); /* 半透明黑色背景 */
-    justify-content: center;
-    align-items: center;
+/* --- 6. 新手指南彈窗 (Modal) --- */
+.guide-modal, .glossary-modal {
+    display: none; position: fixed; z-index: 2000; left: 0; top: 0;
+    width: 100%; height: 100%; background-color: rgba(0,0,0,0.9);
+    backdrop-filter: blur(8px); justify-content: center; align-items: center;
 }
 
+/* 放大版 Guide Content */
+.guide-content {
+    background: #1a1a1a; width: 95%; max-width: 1100px; padding: 50px;
+    border-radius: 20px; border: 1px solid #444; position: relative;
+    text-align: center; color: white; box-shadow: 0 0 50px rgba(0,0,0,0.8);
+    max-height: 95vh; overflow-y: auto;
+}
+
+/* 一般 Glossary Content */
 .glossary-content {
-    background-color: #fff;
-    padding: 25px;
-    border-radius: 12px;
-    width: 90%;
-    max-width: 500px; /* 最大寬度 */
-    position: relative;
-    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-    text-align: left;
-    max-height: 80vh; /* 避免太高超出螢幕 */
-    overflow-y: auto; /* 內容太多時可捲動 */
+    background-color: #fff; padding: 25px; border-radius: 12px;
+    width: 90%; max-width: 500px; position: relative;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3); text-align: left;
+    max-height: 80vh; overflow-y: auto;
 }
-
 .glossary-content h3 {
     margin-top: 0;
-    color: #134A8E;
-    border-bottom: 2px solid #eee;
-    padding-bottom: 10px;
+    color: var(--theme-color);             /* 使用變數 */
+    border-bottom: 2px solid #eee; padding-bottom: 10px;
+}
+.glossary-content ul { padding-left: 20px; line-height: 1.6; color: #333; }
+.glossary-content li { margin-bottom: 10px; }
+
+/* 關閉按鈕 */
+.close-guide { position: absolute; top: 20px; right: 30px; font-size: 50px; cursor: pointer; color: #888; line-height: 0.8; transition: color 0.3s; }
+.close-guide:hover { color: #fff; }
+.close-glossary { position: absolute; top: 10px; right: 15px; color: #aaa; font-size: 28px; font-weight: bold; cursor: pointer; }
+.close-glossary:hover { color: #000; }
+
+/* TV Scoreboard (放大版) */
+.tv-scoreboard {
+    display: inline-flex; flex-wrap: wrap; justify-content: center;
+    background: linear-gradient(180deg, #222, #000); border-radius: 8px;
+    overflow: hidden; border-top: 2px solid #555;
+    box-shadow: 0 10px 30px rgba(0,0,0,0.5); margin-bottom: 25px; user-select: none;
+    transform: scale(1.05);
+}
+.tv-scoreboard > div {
+    padding: 15px 25px; border-right: 1px solid #333; display: flex;
+    align-items: center; justify-content: center; cursor: help;
+    transition: background 0.3s; min-height: 70px;
+}
+.tv-scoreboard > div:hover { background: #333; }
+.tv-scoreboard > div:last-child { border-right: none; }
+
+.sb-team { font-family: 'Impact', sans-serif; font-size: 32px; gap: 15px; }
+.sb-logo { width: 40px; height: 40px; object-fit: contain;}
+.sb-score { color: #fff; background: #333; padding: 4px 12px; border-radius: 4px; min-width: 50px;}
+
+.sb-inning { flex-direction: column; line-height: 1; width: 80px;}
+.inning-arrow { color: #ff4444; font-size: 16px; }
+.inning-num { font-size: 26px; font-weight: bold;}
+
+.sb-bases { position: relative; width: 80px; height: 60px; }
+.base-icon {
+    position: absolute; width: 14px; height: 14px; background: #444;
+    transform: rotate(45deg); border: 1px solid #666;
+}
+.base-icon.active { background: #ffeb3b; border-color: #fff; box-shadow: 0 0 5px #ffeb3b; }
+.b2 { top: 8px; left: 32px; } .b1 { top: 23px; right: 15px; } .b3 { top: 23px; left: 15px; } 
+
+.sb-count { flex-direction: column; gap: 6px; width: 130px; }
+.count-balls, .count-strikes, .count-outs { display: flex; gap: 4px; }
+.dot { width: 10px; height: 10px; border-radius: 50%; background: #333; border: 1px solid #555; }
+.dot.ball.active { background: #4CAF50; border-color: #4CAF50; }
+.dot.strike.active { background: #F44336; border-color: #F44336; }
+.dot.out.active { background: #FFC107; border-color: #FFC107; }
+.count-text { font-family: monospace; font-size: 14px; color: #aaa; margin-top: 4px;}
+
+.sb-pitcher { flex-direction: column; font-size: 16px; align-items: flex-start !important; width: 150px;}
+.p-name { font-weight: bold; color: #fff; }
+.p-count { color: #888; }
+
+.decoder-info-box {
+    background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 10px;
+    font-size: 24px; color: #ffeb3b; font-weight: bold; min-height: 100px;
+    display: flex; align-items: center; justify-content: center;
+    border: 1px dashed #555; margin-bottom: 20px;
 }
 
-.glossary-content ul {
-    padding-left: 20px;
-    line-height: 1.6;
+.rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
+.rule-card {
+    background: #222; padding: 30px; border-radius: 10px; text-align: left;
+    border: 1px solid #333; transition: transform 0.3s;
+}
+.rule-card:hover { transform: translateY(-5px); border-color: #555; }
+.rule-card h3 { color: #fbc02d; margin-top: 0; font-size: 24px; margin-bottom: 15px;}
+.rule-card p { font-size: 18px; color: #ccc; line-height: 1.6; }
+
+/* RWD */
+@media screen and (max-width: 768px) {
+    .apple-section, .apple-section.reverse-layout { flex-direction: column; text-align: center; gap: 40px; }
+    .apple-title { font-size: 36px; }
+    .apple-desc { font-size: 18px; }
+    .team-selection { flex-direction: column; align-items: center; gap: 30px; }
+    .team-card { width: 80%; height: 250px; }
+    .container h1 { font-size: 24px; }
+    
+    .tv-scoreboard { transform: scale(1); }
+    .tv-scoreboard > div { font-size: 12px; padding: 5px 10px;}
+    .guide-content { padding: 20px; width: 98%; }
+    .sb-team { font-size: 20px; }
+    .decoder-info-box { font-size: 16px; }
 }
 
-.glossary-content li {
-    margin-bottom: 10px;
+/* --- 共用：右下角問號按鈕與彈窗 --- */
+.help-btn { 
+    position: fixed; bottom: 30px; right: 30px; 
+    width: 50px; height: 50px; border-radius: 50%; 
+    background: #134A8E; color: white; font-size: 24px; font-weight: bold; 
+    display: flex; justify-content: center; align-items: center; 
+    cursor: pointer; box-shadow: 0 5px 15px rgba(0,0,0,0.5); 
+    border: 2px solid rgba(255,255,255,0.2); z-index: 2000; 
+    transition: transform 0.3s;
+}
+.help-btn:hover { transform: scale(1.1); background: #005A9C; }
+
+.help-modal { 
+    display: none; position: fixed; top: 0; left: 0; 
+    width: 100%; height: 100%; background: rgba(0,0,0,0.8); 
+    z-index: 3000; justify-content: center; align-items: center;
 }
 
-/* 關閉按鈕 (X) */
-.close-glossary {
+.help-content { 
+    background: #222; 
+    border: 1px solid #444; 
+    color: white; 
+    padding: 40px; /* 增加內距 */
+    border-radius: 15px; 
+    
+    /* ★ 關鍵修改：變寬、變高 ★ */
+    width: 95%; 
+    max-width: 1000px; /* 原本是 600px，現在加寬到 1000px */
+    max-height: 90vh; 
+    overflow-y: auto;
+    
+    box-shadow: 0 10px 50px rgba(0,0,0,0.9); 
+    position: relative;
+    transition: all 0.3s ease;
+}
+
+/* 標題字體加大 */
+.help-content h2 { 
+    color: #FFD700; 
+    border-bottom: 2px solid #555; 
+    padding-bottom: 15px; 
+    margin-bottom: 25px; 
+    margin-top: 0;
+    font-size: 32px; /* 預設標題變大 */
+    text-align: center;
+}
+
+/* 內文區域 (給它一個 class 方便 JS 控制字體) */
+.help-text-body {
+    font-size: 18px; /* 預設內文字體變大 (原本約 16px) */
+    line-height: 1.8; /* 行距拉開，閱讀更舒服 */
+    color: #ddd;
+}
+
+.help-text-body h3 {
+    font-size: 24px;
+    margin-top: 30px;
+    margin-bottom: 15px;
+    border-left: 5px solid; /* 左邊加個裝飾線 */
+    padding-left: 10px;
+}
+
+.help-text-body ul { 
+    padding-left: 20px; 
+    background: rgba(255,255,255,0.05); /* 稍微淺一點的背景區隔 */
+    padding: 20px 40px;
+    border-radius: 10px;
+}
+
+.help-text-body li { 
+    margin-bottom: 12px; 
+}
+
+/* --- 🔍 放大縮小控制按鈕 --- */
+.zoom-controls {
     position: absolute;
-    top: 10px;
-    right: 15px;
-    color: #aaa;
-    font-size: 28px;
-    font-weight: bold;
+    top: 25px;
+    left: 30px;
+    display: flex;
+    gap: 10px;
+}
+
+.zoom-btn {
+    background: #333;
+    border: 1px solid #666;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    font-size: 18px;
     cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-weight: bold;
 }
-.close-glossary:hover {
-    color: #000;
+
+.zoom-btn:hover {
+    background: #134A8E;
+    border-color: #4488ff;
+    transform: scale(1.1);
 }
+
+/* 關閉按鈕微調 */
+.close-help { 
+    position: absolute; 
+    top: 20px; 
+    right: 30px; 
+    font-size: 40px; 
+    cursor: pointer; 
+    color: #888; 
+    transition: color 0.3s;
+}
+.close-help:hover { color: #ff4444; }

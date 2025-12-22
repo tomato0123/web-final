@@ -16,15 +16,12 @@ def get_mlb_roster(team_id):
     print(f"\n--- 開始抓取球隊 {team_id} 的 2025 賽季資料 ---") 
     url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/roster"
     
-    # ★ 設定為 2025 (因為賽季已結束，數據應該都有了)
-    params = {
-        "hydrate": "person(stats(group=[hitting,pitching],type=season,season=2025))",
-        "season": 2025 
-    }
+    params = {"hydrate": "person(stats(group=[hitting,pitching],type=season,season=2025))", "season": 2025}
     
+    # ★ 修正這裡：分開初始化兩個列表
     hitters = []
     pitchers = []
-
+    
     try:
         response = requests.get(url, params=params)
         data = response.json()
@@ -37,21 +34,12 @@ def get_mlb_roster(team_id):
             person = player.get('person', {})
             player_name = person.get('fullName', 'Unknown')
             player_id = person.get('id')
-            
-            # --- 新人判斷邏輯 (2025版) ---
             is_rookie = person.get('rookie', False)
             
-            # 輔助判斷：如果是 2025 年才初登場，也視為新人
-            debut_date = person.get('mlbDebutDate', '')
-            if debut_date and debut_date.startswith('2025'):
-                is_rookie = True
-            
-            # 抓取守備位置
             pos_data = player.get('position') or person.get('primaryPosition') or {}
             pos_code = pos_data.get('code')
             pos_abbr = pos_data.get('abbreviation')
 
-            # 提取數據 (統一抓 2025)
             stats_list = person.get('stats', [])
             hitter_stat = {}
             pitcher_stat = {}
@@ -60,67 +48,47 @@ def get_mlb_roster(team_id):
                 group = s.get('group', {}).get('displayName', '').lower()
                 splits = s.get('splits', [])
                 if splits:
-                    if group == 'hitting':
-                        hitter_stat = splits[0].get('stat', {})
-                    elif group == 'pitching':
-                        pitcher_stat = splits[0].get('stat', {})
+                    if group == 'hitting': hitter_stat = splits[0].get('stat', {})
+                    elif group == 'pitching': pitcher_stat = splits[0].get('stat', {})
 
-            # --- 分流判斷 ---
-
-            # 1. 處理投手 (Pitchers)
-            # 條件：投手(1)、二刀流(Y)、TWP，或有 2025 投球數據
+            # 1. 處理投手
             if pos_code == '1' or pos_code == 'Y' or pos_abbr == 'TWP' or pitcher_stat:
                 pitchers.append({
+                    'id': player_id,
                     'name': player_name,
                     'position': pos_abbr,
                     'is_rookie': is_rookie,
                     'img': f"https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/{player_id}/headshot/67/current",
                     'stats': {
                         'type': 'pitcher',
-                        'era': pitcher_stat.get('era', '-.--'),
-                        'whip': pitcher_stat.get('whip', '-.--'),
-                        'w_l': f"{pitcher_stat.get('wins', 0)}-{pitcher_stat.get('losses', 0)}",
-                        'sv': pitcher_stat.get('saves', 0),
-                        'ip': pitcher_stat.get('inningsPitched', '0.0'),
-                        'so_bb': pitcher_stat.get('strikeoutWalkRatio', '-.--'),
-                        'k9': pitcher_stat.get('strikeoutsPer9Inn', '-.--'),
-                        'bb9': pitcher_stat.get('walksPer9Inn', '-.--'),
-                        'h9': pitcher_stat.get('hitsPer9Inn', '-.--'),
-                        'hr9': pitcher_stat.get('homeRunsPer9Inn', '-.--')
+                        'era': pitcher_stat.get('era', '0.00'),
+                        'whip': pitcher_stat.get('whip', '0.00'),
+                        'k9': pitcher_stat.get('strikeoutsPer9Inn', '0.00'),
+                        'bb9': pitcher_stat.get('walksPer9Inn', '0.00')
                     }
                 })
 
-            # 2. 處理打者 (Hitters)
-            # 條件：非純投手(1)，或者有 2025 打擊數據 (大谷翔平會進來這裡)
+            # 2. 處理打者
             if pos_code != '1' or hitter_stat:
                 hitters.append({
+                    'id': player_id,
                     'name': player_name,
                     'position': pos_abbr,
                     'is_rookie': is_rookie,
                     'img': f"https://img.mlbstatic.com/mlb-photos/image/upload/d_people:generic:headshot:67:current.png/w_213,q_auto:best/v1/people/{player_id}/headshot/67/current",
                     'stats': {
                         'type': 'hitter',
-                        'avg': hitter_stat.get('avg', '.---'),
-                        'hr': hitter_stat.get('homeRuns', 0),
-                        'ab': hitter_stat.get('atBats', 0),
-                        'h': hitter_stat.get('hits', 0),
-                        'rbi': hitter_stat.get('rbi', 0),
-                        'r': hitter_stat.get('runs', 0),
-                        'bb': hitter_stat.get('baseOnBalls', 0),
-                        'so': hitter_stat.get('strikeOuts', 0),
-                        'obp': hitter_stat.get('obp', '.---'),
-                        'slg': hitter_stat.get('slg', '.---'),
-                        'ops': hitter_stat.get('ops', '.---'),
-                        'babip': hitter_stat.get('babip', '.---'),
+                        'avg': hitter_stat.get('avg', '.000'),
+                        'ops': hitter_stat.get('ops', '.000'),
+                        'hr': hitter_stat.get('homeRuns', 0)
                     }
                 })
-        
-        print(f"--- 成功: {team_id} 抓到 {len(hitters)} 位打者, {len(pitchers)} 位投手 ---\n")
                 
     except Exception as e:
         print(f"Error fetching roster: {e}")
 
     return hitters, pitchers
+
 
 def get_mlb_coaches(team_id):
     url = f"https://statsapi.mlb.com/api/v1/teams/{team_id}/coaches"
@@ -264,6 +232,58 @@ def sandbox_page():
     lad_players = process_team_players(lad_hitters, lad_pitchers, 'dodgers')
 
     return render_template('sandbox.html', bluejays=bj_players, dodgers=lad_players)
+
+@app.route('/api/zones/<int:player_id>/<string:pos_type>')
+def get_player_zones(player_id, pos_type):
+    # ★ 修改：使用 hotColdZones 抓取九宮格數據
+    stat_type = "hotColdZones"
+    # 如果是打者抓 hitting，投手抓 pitching (被打擊數據)
+    group = "pitching" if pos_type == 'pitcher' else "hitting"
+    
+    player_zones = []
+    
+    # 優先嘗試 2025，若無則回退 2024
+    seasons_to_try = [2025, 2024]
+     
+    for season in seasons_to_try:
+        try:
+            url = f"https://statsapi.mlb.com/api/v1/people/{player_id}/stats?stats={stat_type}&group={group}&season={season}"
+            print(f"Requesting: {url}")
+            res = requests.get(url).json()
+            
+            if 'stats' in res and res['stats']:
+                splits = res['stats'][0].get('splits', [])
+                if splits: 
+                    # hotColdZones 的結構通常在 splits[0].stat.zones
+                    raw_zones = splits[0].get('stat', {}).get('zones', [])
+                    
+                    for z in raw_zones:
+                        zone_code = z.get('zone') # 例如 "01", "09", "11"
+                        if zone_code and zone_code.isdigit():
+                            z_num = int(zone_code)
+                            # 只取 1~9 號位 (好球帶九宮格)
+                            if 1 <= z_num <= 9:
+                                # 取出數值 (可能是打擊率 .300)
+                                val_str = z.get('value', '.000')
+                                try:
+                                    val = float(val_str)
+                                except: val = 0.0
+                                
+                                player_zones.append({"zone": z_num, "pct": val})
+                    
+                    if player_zones: 
+                        print(f"Found {len(player_zones)} zones for {player_id}")
+                        break
+        except Exception as e: 
+            print(f"API Error: {e}")
+            continue
+    
+    # 防呆：若真的沒資料，回傳空陣列
+    if not player_zones:
+        return jsonify([])
+
+    return jsonify(player_zones)
+
 
 # API 給 matchup.js 用的
 @app.route('/api/players')
