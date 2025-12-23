@@ -101,6 +101,27 @@ html, body {
 }
 .vs-btn:hover { filter: brightness(1.2); transform: scale(1.05); }
 
+/* ★ 新增：簡報連結按鈕樣式 ★ */
+.presentation-btn {
+    margin-top: 15px;
+    display: inline-block;
+    padding: 10px 25px;
+    color: #ccc;
+    text-decoration: none;
+    font-size: 14px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 20px;
+    transition: all 0.3s;
+    background: rgba(0, 0, 0, 0.4);
+    backdrop-filter: blur(2px);
+}
+.presentation-btn:hover {
+    color: white;
+    border-color: #fff;
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
 .scroll-indicator {
     position: absolute; bottom: 10px; left: 50%; transform: translateX(-50%);
     color: rgba(255,255,255,0.7); animation: bounce 2s infinite;
@@ -158,8 +179,8 @@ html, body {
     width: 100vw;
 }
 
-.bluejays-bg { background-image: url('bjPage_bg.jpg'); } 
-.dodgers-bg { background-image: url('doPage_bg.jpg'); }
+.bluejays-bg { background-image: url('images/bjPage_bg.jpg'); } 
+.dodgers-bg { background-image: url('images/doPage_bg.jpg'); }
 
 .layout-container {
     display: flex; height: 100vh; width: 100%;
@@ -323,13 +344,16 @@ html, body {
 .p-name { font-weight: bold; color: #fff; }
 .p-count { color: #888; }
 
+/* 解說文字框加大 */
 .decoder-info-box {
     background: rgba(255, 255, 255, 0.05); padding: 25px; border-radius: 10px;
-    font-size: 24px; color: #ffeb3b; font-weight: bold; min-height: 100px;
+    font-size: 24px; /* 字體加大 */
+    color: #ffeb3b; font-weight: bold; min-height: 100px;
     display: flex; align-items: center; justify-content: center;
     border: 1px dashed #555; margin-bottom: 20px;
 }
 
+/* 規則卡片加大 */
 .rules-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 30px; }
 .rule-card {
     background: #222; padding: 30px; border-radius: 10px; text-align: left;
