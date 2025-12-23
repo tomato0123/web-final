@@ -51,7 +51,7 @@ def get_mlb_roster(team_id):
                     if group == 'hitting': hitter_stat = splits[0].get('stat', {})
                     elif group == 'pitching': pitcher_stat = splits[0].get('stat', {})
 
-            # 1. 處理投手
+            # 1. 處理投手 (補上 script.js 需要的所有欄位)
             if pos_code == '1' or pos_code == 'Y' or pos_abbr == 'TWP' or pitcher_stat:
                 pitchers.append({
                     'id': player_id,
@@ -64,11 +64,18 @@ def get_mlb_roster(team_id):
                         'era': pitcher_stat.get('era', '0.00'),
                         'whip': pitcher_stat.get('whip', '0.00'),
                         'k9': pitcher_stat.get('strikeoutsPer9Inn', '0.00'),
-                        'bb9': pitcher_stat.get('walksPer9Inn', '0.00')
+                        'bb9': pitcher_stat.get('walksPer9Inn', '0.00'),
+                        # ★ 新增以下缺少的欄位 ★
+                        'w_l': f"{pitcher_stat.get('wins', 0)}-{pitcher_stat.get('losses', 0)}",
+                        'sv': pitcher_stat.get('saves', 0),
+                        'ip': pitcher_stat.get('inningsPitched', '0.0'),
+                        'so_bb': pitcher_stat.get('strikeoutWalkRatio', '0.00'),
+                        'h9': pitcher_stat.get('hitsPer9Inn', '0.00'),
+                        'hr9': pitcher_stat.get('homeRunsPer9Inn', '0.00')
                     }
                 })
 
-            # 2. 處理打者
+            # 2. 處理打者 (補上 script.js 需要的所有欄位)
             if pos_code != '1' or hitter_stat:
                 hitters.append({
                     'id': player_id,
@@ -80,7 +87,17 @@ def get_mlb_roster(team_id):
                         'type': 'hitter',
                         'avg': hitter_stat.get('avg', '.000'),
                         'ops': hitter_stat.get('ops', '.000'),
-                        'hr': hitter_stat.get('homeRuns', 0)
+                        'hr': hitter_stat.get('homeRuns', 0),
+                        # ★ 新增以下缺少的欄位 ★
+                        'ab': hitter_stat.get('atBats', 0),
+                        'h': hitter_stat.get('hits', 0),
+                        'rbi': hitter_stat.get('rbi', 0),
+                        'r': hitter_stat.get('runs', 0),
+                        'bb': hitter_stat.get('baseOnBalls', 0),
+                        'so': hitter_stat.get('strikeOuts', 0),
+                        'obp': hitter_stat.get('obp', '.000'),
+                        'slg': hitter_stat.get('slg', '.000'),
+                        'babip': hitter_stat.get('babip', '.000')
                     }
                 })
                 
